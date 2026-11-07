@@ -35,7 +35,7 @@ Choose options, select **Generate fresh**, and print. The optional answer key st
 
 ## PWA and offline use
 
-The build generates a web manifest and Workbox service worker. Open once online to cache the app, then use it offline. Install with Chrome/Edge's install option, or Safari's Share → Add to Home Screen. The app includes original 192px and 512px icons. Fonts are bundled locally; there are no third-party runtime requests. Updates are installed automatically when a new version is available. No server or account is required.
+The build generates a web manifest and Workbox service worker. Open once online to cache the app, then use it offline. Install with Chrome/Edge's install option, or Safari's Share → Add to Home Screen. The app uses the Playground “Magic k” icon without bunny ears. It includes 192px/512px app icons, a separately padded opaque 512px Android maskable icon, a 180px Apple touch icon, and a 32px browser favicon. Regenerate them with `npm run icons` from `artwork/icon-magic-k.png`. Versioned asset URLs help refresh cached icons; browsers and operating systems control when an installed app’s icon is refreshed. The app identity, start URL, scope, and saved progress are unchanged. Fonts are bundled locally; there are no third-party runtime requests. Updates are installed automatically when a new version is available. No server or account is required.
 
 Accessibility includes semantic controls, selected-state announcements, keyboard input, live feedback, a skip link, visible focus rings, large touch targets, and support for reduced-motion preferences.
 
@@ -47,4 +47,4 @@ In **Settings → Pages → Build and deployment**, select **GitHub Actions** as
 
 ## Original artwork
 
-Milo, Luna, the meadow, and the application icon are original vector artwork made for this project. They use no third-party cartoon characters or branding. Standard emoji are rendered by each device.
+Milo, Luna, and the meadow are original vector artwork made for this project. The original Magic k icon artwork and its exported assets are included in this repository. They use no third-party cartoon characters or branding. Standard emoji are rendered by each device.
