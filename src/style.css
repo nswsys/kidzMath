@@ -161,3 +161,130 @@
  .is-playing .feedback.incorrect .reaction-mascot{height:55px;width:48px}
  .is-playing .reaction-stars{font-size:21px;letter-spacing:12px;inset:0 -35px auto}
 }
+
+/* Grow into tall portrait screens instead of leaving an empty lower half.
+   Minimum sizes remain intact, so short screens and enlarged text can scroll. */
+@media (max-width:1024px) and (orientation:portrait){
+ .app-shell.is-home,.app-shell.is-playing{
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+ }
+ .is-home .header,.is-playing .header{flex-shrink:0}
+ .is-home main,.is-playing main{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  width:100%;
+  margin:0 auto;
+  min-height:0;
+  padding-bottom:max(12px,env(safe-area-inset-bottom));
+ }
+ .is-home .hero{flex-shrink:0}
+ .is-home .adventure-section{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+ }
+ .is-home .adventure-layout{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+ }
+ .is-home .setup-card{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  flex:1;
+ }
+ .is-home .operation{min-height:clamp(78px,11dvh,110px)}
+ .is-home .start-row{flex-shrink:0}
+ .is-home .start{min-height:clamp(49px,7dvh,68px);font-size:clamp(16px,2.2dvh,20px)}
+ .is-playing .game-shell{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  width:100%;
+  padding-bottom:0;
+ }
+ .is-playing .game-top,.is-playing .game-shell>.progress-track{flex-shrink:0}
+ .is-playing .game-layout{
+  flex:1;
+  grid-template-columns:minmax(0,1fr);
+ }
+ .is-playing .game-buddy{display:none}
+ .is-playing .question-card{display:flex;flex-direction:column}
+ .is-playing .question-card>form{display:flex;flex-direction:column;flex:1}
+ .is-playing .question-label,.is-playing .answer-action{flex-shrink:0}
+ .is-playing .math-question{font-size:clamp(30px,5.2dvh,52px)}
+ .is-playing .answer-input{
+  align-self:center;
+  max-width:400px;
+  height:clamp(44px,6.2dvh,62px);
+  flex-shrink:0;
+  font-size:clamp(29px,4dvh,38px);
+ }
+ .is-playing .answer-stage{flex:1;min-height:170px}
+ .is-playing .keypad{
+  max-width:400px;
+  width:100%;
+  margin:10px auto;
+ }
+ .is-playing .keypad button{font-size:clamp(22px,3.2dvh,30px)}
+ .is-playing .feedback.correct,.is-playing .feedback.incorrect{
+  flex:1;
+  justify-content:center;
+  font-size:clamp(13px,1.8dvh,18px);
+  gap:clamp(5px,1.2dvh,12px);
+ }
+ .is-playing .reaction-mascot{
+  height:clamp(102px,20dvh,200px);
+  width:auto;
+  aspect-ratio:6 / 7;
+ }
+ .is-playing .feedback.incorrect .reaction-mascot{
+  height:clamp(55px,12dvh,120px);
+  width:auto;
+ }
+ .is-playing .reaction-stars{
+  inset:0 -35px auto;
+  font-size:clamp(21px,3dvh,30px);
+  letter-spacing:clamp(12px,2dvh,20px);
+ }
+ .is-playing .answer-action .primary{
+  min-height:clamp(49px,7dvh,68px);
+  font-size:clamp(14px,2dvh,19px);
+ }
+}
+@media(max-width:600px) and (orientation:portrait){
+ .is-home .hero{
+  --welcome-width:clamp(110px,15dvh,145px);
+  grid-template-columns:minmax(0,1fr) var(--welcome-width);
+  padding-block:clamp(8px,1.3dvh,14px);
+ }
+ .is-home .hero h1{font-size:clamp(26px,min(3.8dvh,7.3vw),34px)}
+ .is-home .meadow{width:var(--welcome-width);height:clamp(70px,10dvh,102px)}
+ .is-home .hero-milo,.is-home .hero-luna{
+  width:calc(var(--welcome-width) * .67);
+  height:clamp(73px,10.4dvh,106px);
+ }
+ .is-home .step-heading h3{font-size:clamp(15px,2.1dvh,19px)}
+ .is-home legend{font-size:clamp(12px,1.6dvh,15px)}
+ .is-home .segments button{min-height:clamp(44px,6.4dvh,62px)}
+ .is-home .levels button{font-size:clamp(12px,min(1.65dvh,3.5vw),16px)}
+ .is-home .levels button small{font-size:clamp(10px,1.3dvh,12px)}
+ .is-home .counts button{font-size:clamp(15px,2.2dvh,20px)}
+ .is-home .quiz-length legend{min-width:clamp(83px,12dvh,110px)}
+ .is-home .mode-options button{
+  min-height:clamp(44px,6.4dvh,62px);
+  font-size:clamp(10px,1.4dvh,13px);
+ }
+ .is-playing .keypad{grid-template-rows:repeat(3,clamp(44px,7dvh,72px))}
+ .is-playing .keypad button{height:100%;min-height:44px}
+}
+
+@media(max-width:360px) and (orientation:portrait){
+ .is-home .quiz-length{display:block}
+ .is-home .quiz-length legend{float:none;margin:0 0 7px;min-width:0}
+}
