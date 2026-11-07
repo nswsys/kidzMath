@@ -1,0 +1,9 @@
+import type {Settings} from './math';
+export type Result={id:string;date:string;correct:number;total:number;bestStreak:number;settings:Settings;percentage:number;grade:string;stars:number;points:number};
+export type Progress={version:1;results:Result[]};
+export const KEY='kidzmath.progress.v1';
+export interface Store{getItem(key:string):string|null;setItem(key:string,value:string):void}
+function valid(r:Result){return r&&typeof r.id==='string'&&Number.isFinite(Date.parse(r.date))&&Number.isInteger(r.total)&&r.total>0&&Number.isInteger(r.correct)&&r.correct>=0&&r.correct<=r.total&&Number.isInteger(r.stars)&&r.stars>=1&&r.stars<=3&&Number.isFinite(r.points)&&r.points>=0&&Number.isFinite(r.percentage)&&r.percentage>=0&&r.percentage<=100&&Number.isInteger(r.bestStreak)&&r.bestStreak>=0&&typeof r.grade==='string'&&r.settings&&['Easy','Medium','Challenge'].includes(r.settings.difficulty)&&['Addition','Subtraction','Mixed'].includes(r.settings.operation)&&['Numbers','Counting','Stories'].includes(r.settings.mode)}
+export function loadProgress(storage:Store):Progress{try{const p=JSON.parse(storage.getItem(KEY)||'null');if(p?.version===1&&Array.isArray(p.results))return {version:1,results:p.results.filter(valid).slice(0,1000)}}catch{/* Unavailable or corrupt storage starts fresh. */}return {version:1,results:[]};}
+export function saveResult(storage:Store,result:Result):Progress {const p=loadProgress(storage);if(!p.results.some(r=>r.id===result.id))p.results.unshift(result);p.results=p.results.slice(0,1000);storage.setItem(KEY,JSON.stringify(p));return p;}
+export function totals(p:Progress){const r=p.results;const answers=r.reduce((s,x)=>s+x.total,0);return {games:r.length,accuracy:answers?Math.round(r.reduce((s,x)=>s+x.correct,0)/answers*100):0,stars:r.reduce((s,x)=>s+x.stars,0),points:r.reduce((s,x)=>s+x.points,0),streak:Math.max(0,...r.map(x=>x.bestStreak))};}
