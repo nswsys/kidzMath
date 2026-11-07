@@ -13,6 +13,12 @@ npm run dev
 
 Open the development URL at `/kidzMath/`. Run `npm test` for arithmetic, validation, scoring, and persistence tests. Run `npm run build` for the TypeScript check and production build; `npm run preview` serves the built app at `/kidzMath/`.
 
+## Playground experience
+
+The approved Playground design adds a skippable animated welcome, waving/blinking Milo and Luna, colorful number tiles, original synthesized pop/high-five/fanfare sounds, and a trophy-and-confetti finish. The welcome appears once per browser session; replay it with **Meet Milo & Luna** in the footer. **Play quietly** saves the mute preference. Audio never plays automatically on page load, and muting stops active effects and speech. System reduced-motion preferences disable motion effects.
+
+The production app keeps its existing installation URL, progress key/schema, scoring, quiz options, and worksheets. Correct answers show a +10-point reaction; end-of-game stars still follow the scoring rules below. No demo progress or prototype controls are included.
+
 ## Learning adventures
 
 Choose addition, subtraction, or mixed practice; Easy (0–20), Medium (0–100), or Challenge (0–1000); and 5, 10, 15, or 20 questions. Choose numbers, picture counting, or short English story problems. Addition totals stay inside the selected range, and subtraction never goes negative. Picture counting uses up to 20 objects at every level to remain useful and readable.
