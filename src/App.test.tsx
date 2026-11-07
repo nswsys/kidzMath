@@ -4,15 +4,18 @@ import {cleanup,render,screen,fireEvent,within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import {KEY,loadProgress} from './progress';
+import {WELCOME_KEY} from './Playground';
+import {SoundKit} from './sounds';
+import {defaults,score} from './math';
 function answer(){const t=document.querySelector('.math-question')!.textContent!;const m=t.match(/(\d+)\s*([+−])\s*(\d+)/)!;return String(m[2]==='+'?Number(m[1])+Number(m[3]):Number(m[1])-Number(m[3]));}
-beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});localStorage.clear();vi.spyOn(Math,'random').mockReturnValue(.2);HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','')};HTMLDialogElement.prototype.close=function(){this.removeAttribute('open')}});
+beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});localStorage.clear();sessionStorage.clear();sessionStorage.setItem(WELCOME_KEY,'seen');vi.spyOn(SoundKit.prototype,'play').mockReturnValue(true);vi.spyOn(SoundKit.prototype,'stop').mockImplementation(()=>{});vi.spyOn(Math,'random').mockReturnValue(.2);HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','')};HTMLDialogElement.prototype.close=function(){this.removeAttribute('open')}});
 afterEach(()=>{cleanup();vi.restoreAllMocks()});
 describe('complete learning flows',()=>{
  it('finishes a game, persists first-attempt scores, retries mistakes, and restores dashboard',async()=>{
   const user=userEvent.setup();const view=render(<App/>);
   await user.click(screen.getByRole('button',{name:/^Addition/}));await user.click(screen.getByRole('button',{name:'5'}));await user.click(screen.getByRole('button',{name:'Let’s play!'}));
   for(let i=0;i<5;i++){expect(screen.getByText(`Question ${i+1} of 5`)).toBeTruthy();const field=screen.getByLabelText('Your answer');await user.type(field,i===0?'9999':answer());await user.keyboard('{Enter}');expect(screen.getByRole('status').textContent).toMatch(i===0?/Good try/:/Wonderful/);await user.click(screen.getByRole('button',{name:i===4?'See my stars':'Next question'}))}
-  expect(screen.getByText('80%')).toBeTruthy();expect(screen.getByText('B',{exact:true})).toBeTruthy();expect(screen.getByText(/New badge: First steps/)).toBeTruthy();const result=loadProgress(localStorage).results[0];expect(result.correct).toBe(4);expect(result.points).toBe(60);expect(result.stars).toBe(2);
+  expect(screen.getByText('80%')).toBeTruthy();expect(screen.getByText('B',{exact:true})).toBeTruthy();expect(screen.getByText(/New badge: First steps/)).toBeTruthy();const result=loadProgress(localStorage).results[0];expect(result.correct).toBe(4);expect(result.points).toBe(60);expect(result.stars).toBe(2);expect(SoundKit.prototype.play).toHaveBeenCalledWith('party');
   await user.click(screen.getByRole('button',{name:/Practice 1 mistake/}));await user.type(screen.getByLabelText('Your answer'),answer());await user.keyboard('{Enter}');await user.click(screen.getByRole('button',{name:'See my stars'}));expect(screen.getByText('100%')).toBeTruthy();expect(loadProgress(localStorage).results).toHaveLength(1);
   view.unmount();render(<App/>);await user.click(screen.getByRole('button',{name:'My progress'}));expect(screen.getByText('80%')).toBeTruthy();expect(screen.getByText('First steps')).toBeTruthy();expect(screen.getAllByRole('row')).toHaveLength(2);
  });
@@ -57,6 +60,39 @@ describe('complete learning flows',()=>{
   await user.type(screen.getByLabelText('Your answer'),'9999');await user.keyboard('{Enter}');
   const status=screen.getByRole('status');expect(status.textContent).toContain('Good try!');expect(status.textContent).toContain('Start at');
   expect(status.querySelector('.reaction-mascot')).toBeTruthy();expect(screen.getByRole('button',{name:'Next question'})).toBeTruthy();
+ });
+
+ it('shows an optional welcome without audio autoplay and preserves existing progress',async()=>{
+  sessionStorage.removeItem(WELCOME_KEY);
+  const existing={id:'old-game',date:'2026-01-01T12:00:00Z',correct:4,total:5,bestStreak:3,settings:defaults,...score(4,5,3)};
+  localStorage.setItem(KEY,JSON.stringify({version:1,results:[existing]}));
+  const user=userEvent.setup();render(<App/>);
+  expect(screen.getByRole('region',{name:'Welcome to kidzMath'})).toBeTruthy();
+  expect(SoundKit.prototype.play).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('button',{name:/Skip intro/}));
+  expect(screen.queryByRole('region',{name:'Welcome to kidzMath'})).toBe(null);
+  expect(sessionStorage.getItem(WELCOME_KEY)).toBe('seen');
+  expect(loadProgress(localStorage).results).toEqual([existing]);
+  await user.click(screen.getByRole('button',{name:'My progress'}));expect(screen.getByText('80%')).toBeTruthy();
+ });
+ it('remembers quiet mode and allows replaying the welcome without discarding progress',async()=>{
+  sessionStorage.removeItem(WELCOME_KEY);const user=userEvent.setup();const view=render(<App/>);
+  await user.click(screen.getByRole('button',{name:/Play quietly/}));
+  expect(localStorage.getItem('kidzmath.muted')).toBe('true');expect(SoundKit.prototype.play).not.toHaveBeenCalled();
+  view.unmount();render(<App/>);expect(screen.queryByRole('region',{name:'Welcome to kidzMath'})).toBe(null);
+  await user.click(screen.getByRole('button',{name:'My progress'}));await user.click(screen.getByRole('button',{name:/Meet Milo/}));
+  expect(screen.getByRole('region',{name:'Welcome to kidzMath'})).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:'Let’s play!'}));expect(screen.getByRole('region',{name:'Choose your game'})).toBeTruthy();
+  expect(SoundKit.prototype.play).not.toHaveBeenCalled();
+ });
+ it('plays playful effects on gestures and stops all effects when muted',async()=>{
+  const user=userEvent.setup();render(<App/>);expect(SoundKit.prototype.play).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('button',{name:'Let’s play!'}));expect(SoundKit.prototype.play).toHaveBeenCalledWith('welcome');
+  await user.type(screen.getByLabelText('Your answer'),answer());await user.keyboard('{Enter}');
+  expect(SoundKit.prototype.play).toHaveBeenCalledWith('correct');expect(screen.getByText('Woo-hoo!')).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:'Mute sound'}));expect(SoundKit.prototype.stop).toHaveBeenCalled();
+  vi.mocked(SoundKit.prototype.play).mockClear();await user.click(screen.getByRole('button',{name:'Next question'}));
+  await user.type(screen.getByLabelText('Your answer'),answer());await user.keyboard('{Enter}');expect(SoundKit.prototype.play).not.toHaveBeenCalled();
  });
 
 });
