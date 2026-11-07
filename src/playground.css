@@ -411,3 +411,20 @@ td{border-color:#eee5f7}
  .print-brand{color:black}
  .is-intro .welcome,.is-intro .header{display:none!important}
 }
+
+/* Keep the new welcome usable on short, wide tablet windows as well. */
+@media(min-width:601px) and (orientation:landscape) and (max-height:720px){
+ .is-intro .header-inner{height:56px}
+ .is-intro main{padding-bottom:max(24px,env(safe-area-inset-bottom))}
+ .is-intro .welcome{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr auto auto;min-height:420px;padding:24px 20px 8px;gap:10px}
+ .is-intro .welcome-copy{align-self:end;text-align:left;padding-bottom:14px}
+ .is-intro .welcome h1{font-size:clamp(34px,4.2vw,46px);margin:14px 0 11px}
+ .is-intro .welcome-buddies{grid-column:2;grid-row:1/4;width:100%;height:250px;min-height:0;max-height:260px;flex:none}
+ .is-intro .welcome-actions{grid-column:1;grid-row:2;align-items:flex-start;width:100%}
+ .is-intro .welcome-actions>.primary{min-height:58px;font-size:22px}
+ .is-intro .welcome-actions .quiet-button{align-self:flex-start}
+ .is-intro .little-disclaimer{grid-column:1;grid-row:3;align-self:start;text-align:left;padding-top:7px;font-size:9px}
+}
+@media(max-width:360px){
+ .is-playing .question-tools .hint-button,.is-playing .question-tools .icon-button{min-width:44px}
+}
