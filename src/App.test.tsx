@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import App from './App';
 import {KEY,loadProgress} from './progress';
 function answer(){const t=document.querySelector('.math-question')!.textContent!;const m=t.match(/(\d+)\s*([+−])\s*(\d+)/)!;return String(m[2]==='+'?Number(m[1])+Number(m[3]):Number(m[1])-Number(m[3]));}
-beforeEach(()=>{localStorage.clear();vi.spyOn(Math,'random').mockReturnValue(.2);HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','')};HTMLDialogElement.prototype.close=function(){this.removeAttribute('open')}});
+beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});localStorage.clear();vi.spyOn(Math,'random').mockReturnValue(.2);HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','')};HTMLDialogElement.prototype.close=function(){this.removeAttribute('open')}});
 afterEach(()=>{cleanup();vi.restoreAllMocks()});
 describe('complete learning flows',()=>{
  it('finishes a game, persists first-attempt scores, retries mistakes, and restores dashboard',async()=>{
@@ -30,4 +30,32 @@ describe('complete learning flows',()=>{
  it('persists mute and shows offline status',async()=>{
   const user=userEvent.setup();render(<App/>);await user.click(screen.getByRole('button',{name:'Mute sound'}));expect(localStorage.getItem('kidzmath.muted')).toBe('true');expect(screen.getByRole('button',{name:'Turn sound on'})).toBeTruthy();vi.spyOn(navigator,'onLine','get').mockReturnValue(false);fireEvent(window,new Event('offline'));expect(screen.getByText(/Offline adventure mode/)).toBeTruthy();
  });
+ it('uses the app keypad without requesting a software keyboard and still accepts physical keys',async()=>{
+  const user=userEvent.setup();render(<App/>);await user.click(screen.getByRole('button',{name:'Let’s play!'}));
+  const field=screen.getByLabelText('Your answer') as HTMLInputElement;
+  expect(field.readOnly).toBe(true);expect(field.getAttribute('inputmode')).toBe('none');
+  await user.click(field);await user.keyboard('12{Backspace}3');expect(field.value).toBe('13');
+  await user.keyboard('{Delete}');expect(field.value).toBe('');
+  await user.click(screen.getByRole('button',{name:'7'}));expect(field.value).toBe('7');
+  expect(field).toBe(document.activeElement);expect(window.scrollTo).toHaveBeenLastCalledWith(0,0);
+ });
+ it('replaces the keypad with a nearby reaction and restores it for the next question',async()=>{
+  const user=userEvent.setup();render(<App/>);await user.click(screen.getByRole('button',{name:'Let’s play!'}));
+  await user.type(screen.getByLabelText('Your answer'),answer());await user.keyboard('{Enter}');
+  const status=screen.getByRole('status');expect(status.textContent).toContain('Wonderful');
+  expect(status.querySelector('.reaction-mascot .happy')).toBeTruthy();
+  expect(screen.queryByRole('button',{name:'7'})).toBe(null);
+  expect(screen.getByRole('button',{name:'Next question'})).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:'Next question'}));
+  expect(screen.getByRole('button',{name:'7'})).toBeTruthy();expect(document.querySelector('.reaction-mascot')).toBe(null);
+  expect(screen.getByText('Question 2 of 10')).toBeTruthy();
+ });
+ it('keeps a wrong-answer explanation beside the reaction and reveals hints on request',async()=>{
+  const user=userEvent.setup();render(<App/>);await user.click(screen.getByRole('button',{name:'Let’s play!'}));
+  await user.click(screen.getByRole('button',{name:'A little hint, please'}));expect(screen.getByText(/Start at/)).toBeTruthy();
+  await user.type(screen.getByLabelText('Your answer'),'9999');await user.keyboard('{Enter}');
+  const status=screen.getByRole('status');expect(status.textContent).toContain('Good try!');expect(status.textContent).toContain('Start at');
+  expect(status.querySelector('.reaction-mascot')).toBeTruthy();expect(screen.getByRole('button',{name:'Next question'})).toBeTruthy();
+ });
+
 });

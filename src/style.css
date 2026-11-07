@@ -8,3 +8,156 @@
 @media print{@page{size:A4;margin:15mm}body{background:white;color:black}.header,footer,.page-title,.worksheet-controls,.notice,.offline,.skip,.modal{display:none!important}main{max-width:none;padding:0;min-height:0}.worksheet-paper{max-width:none;box-shadow:none;border:0;margin:0;padding:0}.worksheet-problems{gap:25px 40px;font-size:20px}.worksheet-problems.stories{font-size:14px}.print-brand{color:black}.worksheet-paper h2{font-size:25px}.worksheet-paper>p,.print-brand span{color:#444}.answer-key{padding-top:10mm}.answer-key h2{margin-top:0}.crossed{opacity:.45}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 
 @media(max-width:600px){.math-question{font-size:clamp(25px,7vw,43px);letter-spacing:0}}
+
+/* The game uses the built-in keypad, with reactions in the same space. */
+.game-context{display:flex;flex-direction:column;align-items:center;gap:3px}
+.game-context strong{font-size:12px;font-weight:600;color:var(--deep)}
+.game-context small{font-size:10px}
+.game-shell>.progress-track{margin:8px 0 0}
+.question-tools{display:flex;align-items:center;gap:6px}
+.question-tools .hint-button{margin:0;min-height:44px;padding:0 8px;gap:5px}
+.answer-stage{min-height:264px;display:flex;flex-direction:column;justify-content:center}
+.keypad[hidden]{display:none}
+.feedback-message{display:flex;align-items:center;justify-content:center;gap:8px}
+.feedback.correct,.feedback.incorrect{flex-direction:column;gap:8px;padding:8px 0}
+.reaction-mascot{position:relative;width:118px;height:136px;flex-shrink:0}
+.reaction-mascot>.mascot{width:100%;height:100%}
+.reaction-stars{position:absolute;inset:0 -45px auto;color:#d5a128;font-size:24px;letter-spacing:18px;white-space:nowrap;animation:star-pop .65s ease-out both}
+.feedback.incorrect .reaction-mascot{height:100px;width:90px}
+.feedback .hint{margin-top:2px;padding:8px 12px;font-size:12px}
+.answer-action{padding:6px 0 8px}
+.is-playing footer{display:none}
+@keyframes star-pop{from{opacity:0;transform:translateY(22px) scale(.3)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* Keep choosing a game close to the top on tablets and phones. */
+@media(max-width:1024px), (max-height:760px){
+ .is-home .hero{display:grid;grid-template-columns:minmax(0,1fr) 130px;gap:10px;padding:16px 0 12px;align-items:center}
+ .is-home .hero .eyebrow,.is-home .hero-copy>p,.is-home .hero-tags,.is-home .title-star{display:none}
+ .is-home .hero h1{font-size:32px;line-height:1.1;letter-spacing:-1px;margin:0}
+ .is-home .meadow{width:130px;height:104px;margin:0;border-radius:24px}
+ .is-home .hero-milo{width:85px;height:103px;left:-5px;bottom:-3px}
+ .is-home .hero-luna{width:85px;height:103px;right:-6px;bottom:-3px}
+ .is-home .buddy-label,.is-home .cloud,.is-home .floating-symbol,.is-home .grass{display:none}
+ .is-home .sun{font-size:24px;right:12px;top:6px}
+ .is-home .flower{font-size:14px;bottom:3px}
+ .is-home .section-heading{margin:0 0 10px}
+ .is-home .section-heading .eyebrow,.is-home .section-heading h2 span{display:none}
+ .is-home .section-heading h2{font-size:23px;margin:0}
+ .is-home .adventure-layout{display:block}
+ .is-home .side-cards,.is-home .bottom-banner,.is-home footer{display:none}
+ .is-home .setup-card{padding:16px 20px 0}
+ .is-home .step-heading{margin-bottom:10px}
+ .is-home .operation{min-height:87px;padding:10px 5px;gap:4px}
+ .is-home .operation-symbol{width:32px;height:30px;font-size:26px;margin:0}
+ .is-home .setup-row{margin-top:16px;gap:14px}
+ .is-home .mode-row{margin:14px 0}
+ .is-home .start-row{padding:12px 0 16px}
+ .is-home .start-row>span{display:none}
+ .is-home .start{width:100%}
+ .is-home main{min-height:0;padding-bottom:12px}
+}
+@media(max-width:600px){
+ .header-inner{height:103px;padding:10px 16px 0}
+ .header-inner nav{margin-top:5px;padding-top:3px}
+ main{padding:0 12px}
+ .is-home .hero{grid-template-columns:minmax(0,1fr) 110px;padding:10px 0 8px}
+ .is-home .hero h1{font-size:28px}
+ .is-home .meadow{width:110px;height:88px}
+ .is-home .hero-milo,.is-home .hero-luna{width:74px;height:88px}
+ .is-home .hero-luna{right:-8px}
+ .is-home .hero-milo{left:-7px}
+ .is-home .section-heading{margin-bottom:8px}
+ .is-home .section-heading h2{font-size:21px}
+ .is-home .setup-card{padding:14px 14px 0}
+ .is-home .operation{min-height:78px;gap:4px}
+ .is-home .operation small{display:none}
+ .is-home .operation strong{font-size:14px}
+ .is-home .setup-row{grid-template-columns:1fr;gap:12px;margin-top:14px}
+ .is-home legend{font-size:12px;margin-bottom:7px;gap:7px}
+ .is-home .quiz-length{display:flex;align-items:center;gap:10px}
+ .is-home .quiz-length legend{float:left;margin:0;align-self:center;min-width:95px}
+ .is-home .quiz-length .counts{flex:1;min-width:0}
+ .is-home .segments button{min-height:44px}
+ .is-home .mode-row{margin:12px 0}
+ .is-home .mode-options button{min-height:44px;flex-direction:row;font-size:10px;gap:4px;padding:8px 3px}
+ .is-home .mode-options button>span{font-size:13px}
+ .is-home .start-row{padding:10px 0 14px}
+ .is-playing .header-inner{height:56px;padding:8px 16px;flex-wrap:nowrap;align-items:center}
+ .is-playing .brand,.is-playing .header-actions{align-self:center;margin:0}
+ .is-playing .header-inner nav{display:none}
+ .is-playing main{min-height:0;padding:0 10px max(8px,env(safe-area-inset-bottom))}
+ .is-playing .game-shell{padding:4px 0 0}
+ .is-playing .game-top{gap:8px;min-height:44px}
+ .is-playing .game-top .text-link{font-size:11px;gap:4px}
+ .is-playing .game-context strong{font-size:12px}
+ .is-playing .game-context small{font-size:9px}
+ .is-playing .streak{font-size:10px}
+ .is-playing .game-shell>.progress-track{height:5px;margin-top:3px}
+ .is-playing .game-layout{grid-template-columns:1fr;gap:0;margin-top:8px}
+ .is-playing .game-buddy{display:none}
+ .is-playing .question-card{padding:8px 14px 6px;border-radius:16px}
+ .is-playing .question-label{min-height:44px}
+ .is-playing .question-label .eyebrow{font-size:9px;letter-spacing:1px}
+ .is-playing .question-tools{gap:0}
+ .is-playing .question-tools .hint-button{min-width:44px;padding:0;justify-content:center}
+ .is-playing .question-tools .hint-button span{display:none}
+ .is-playing .math-question{font-size:clamp(26px,8vw,40px);line-height:1.2;letter-spacing:0;margin:2px 0 8px}
+ .is-playing .story-question{font-size:19px;line-height:1.35;margin:2px 0 10px}
+ .is-playing .answer-label{margin-bottom:3px;font-size:11px}
+ .is-playing .answer-input{height:44px;max-width:260px;font-size:29px;caret-color:transparent;cursor:default}
+ .is-playing .answer-stage{min-height:202px}
+ .is-playing .keypad{width:100%;margin:8px auto 0;gap:6px}
+ .is-playing .keypad button{min-height:44px;font-size:22px}
+ .is-playing .feedback:not(.correct):not(.incorrect){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);min-height:0;padding:0}
+ .is-playing .feedback.correct,.is-playing .feedback.incorrect{min-height:194px;padding:6px 0;font-size:13px}
+ .is-playing .reaction-mascot{height:134px;width:116px}
+ .is-playing .feedback.incorrect .reaction-mascot{height:80px;width:70px}
+ .is-playing .feedback .hint{line-height:1.45;font-size:11px;margin:0}
+ .is-playing .answer-action{position:sticky;bottom:max(8px,env(safe-area-inset-bottom));z-index:2;background:#fffefa;padding:6px 0 8px}
+ .is-playing .counting-picture{padding-bottom:8px;gap:6px}
+ .is-playing .counting-picture>div{gap:3px}
+ .is-playing .counting-picture span{font-size:21px}
+ .is-playing .hint{font-size:12px;line-height:1.5;margin:0 0 8px;padding:10px}
+}
+@media(max-width:360px){
+ .is-home .hero h1{font-size:25px}
+ .is-home .mode-options button{font-size:9px}
+ .is-home .quiz-length legend{min-width:83px}
+ .is-playing .game-context strong{font-size:11px}
+ .is-playing .streak{font-size:9px}
+}
+@media(max-height:500px) and (min-width:601px){
+ .is-home .hero{display:none}
+ .is-home .section-heading{padding-top:12px}
+ .is-playing .header-inner{height:52px;padding:4px 20px}
+ .is-playing .header-inner nav{display:none}
+ .is-playing .game-shell{padding-top:6px}
+ .is-playing .game-layout{grid-template-columns:1fr;margin-top:8px}
+ .is-playing .game-buddy{display:none}
+}
+@media(max-width:600px){
+ .is-home .hero{padding:8px 0}
+ .is-home .hero h1{font-size:26px}
+ .is-home .meadow{height:70px}
+ .is-home .hero-milo,.is-home .hero-luna{height:73px}
+ .is-home .section-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+ /* Three short rows keep the answer action in reach, with editing keys on the right. */
+ .is-playing .answer-stage{min-height:170px}
+ .is-playing .keypad{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,44px)}
+ .is-playing .keypad button:nth-child(1){grid-area:1/1}
+ .is-playing .keypad button:nth-child(2){grid-area:1/2}
+ .is-playing .keypad button:nth-child(3){grid-area:1/3}
+ .is-playing .keypad button:nth-child(4){grid-area:2/1}
+ .is-playing .keypad button:nth-child(5){grid-area:2/2}
+ .is-playing .keypad button:nth-child(6){grid-area:2/3}
+ .is-playing .keypad button:nth-child(7){grid-area:3/1}
+ .is-playing .keypad button:nth-child(8){grid-area:3/2}
+ .is-playing .keypad button:nth-child(9){grid-area:3/3}
+ .is-playing .keypad button:nth-child(10){grid-area:1/4}
+ .is-playing .keypad button:nth-child(11){grid-area:3/4}
+ .is-playing .keypad button:nth-child(12){grid-area:2/4}
+ .is-playing .feedback.correct,.is-playing .feedback.incorrect{min-height:162px;gap:5px}
+ .is-playing .reaction-mascot{height:102px;width:88px}
+ .is-playing .feedback.incorrect .reaction-mascot{height:55px;width:48px}
+ .is-playing .reaction-stars{font-size:21px;letter-spacing:12px;inset:0 -35px auto}
+}
