@@ -46,7 +46,8 @@ describe('complete learning flows',()=>{
   expect(status.querySelector('.reaction-mascot .happy')).toBeTruthy();
   expect(screen.queryByRole('button',{name:'7'})).toBe(null);
   expect(screen.getByRole('button',{name:'Next question'})).toBeTruthy();
-  await user.click(screen.getByRole('button',{name:'Next question'}));
+  vi.mocked(window.scrollTo).mockClear();await user.click(screen.getByRole('button',{name:'Next question'}));
+  expect(window.scrollTo).toHaveBeenCalledWith(0,0);
   expect(screen.getByRole('button',{name:'7'})).toBeTruthy();expect(document.querySelector('.reaction-mascot')).toBe(null);
   expect(screen.getByText('Question 2 of 10')).toBeTruthy();
  });
