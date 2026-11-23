@@ -10,6 +10,10 @@ import {defaults,score} from './math';
 import {generatePuzzle} from './wordsearch';
 import {generateBox} from './numberbox';
 import {directionTo,directions,generateMaze,step} from './maze';
+import {generateScramble} from './scramble';
+import {generatePatterns} from './patterns';
+import {generateCrossword} from './crossword';
+import {generateColoring} from './colorbynumber';
 function answer(){const t=document.querySelector('.math-question')!.textContent!;const m=t.match(/(\d+)\s*([+−])\s*(\d+)/)!;return String(m[2]==='+'?Number(m[1])+Number(m[3]):Number(m[1])-Number(m[3]));}
 beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});localStorage.clear();sessionStorage.clear();sessionStorage.setItem(WELCOME_KEY,'seen');vi.spyOn(SoundKit.prototype,'play').mockReturnValue(true);vi.spyOn(SoundKit.prototype,'stop').mockImplementation(()=>{});vi.spyOn(Math,'random').mockReturnValue(.2);HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','')};HTMLDialogElement.prototype.close=function(){this.removeAttribute('open')}});
 afterEach(()=>{cleanup();vi.restoreAllMocks()});
@@ -199,6 +203,89 @@ describe('complete learning flows',()=>{
   await user.selectOptions(screen.getByLabelText('Mission'),'cheese');await user.selectOptions(screen.getByLabelText('Level'),'Challenge');await user.click(screen.getByRole('button',{name:'Generate fresh'}));
   const maze=generateMaze({theme:'cheese',difficulty:'Challenge'});expect(screen.getByText(/My maze: Cheese chase/)).toBeTruthy();expect(screen.getByText(/Guide the mouse to the cheese!/)).toBeTruthy();
   await user.click(screen.getByLabelText('Include answer key'));expect(document.querySelectorAll('.mz-sheet .mz-art')).toHaveLength(2);expect(document.querySelector('.mz-sheet-key .mz-solution')!.getAttribute('points')!.split(' ')).toHaveLength(maze.solution.length);
+  await user.click(screen.getByRole('button',{name:'Print worksheet'}));expect(print).toHaveBeenCalledOnce();
+ });
+ it('unscrambles themed words with tiles, a hint, and the keyboard',async()=>{
+  const user=userEvent.setup();const view=render(<App/>);
+  await user.click(screen.getByRole('button',{name:/Word scramble/}));expect(screen.getByRole('region',{name:'Choose your word scramble'})).toBeTruthy();await user.click(screen.getByRole('button',{name:/^Fruits/}));await user.click(screen.getByRole('button',{name:'Unscramble!'}));
+  const puzzle=generateScramble({theme:'fruits',difficulty:'Easy'}),total=puzzle.words.length;expect(total).toBe(5);
+  const tile=(i:number)=>document.querySelector<HTMLButtonElement>(`.sc-tile[data-tile="${i}"]`)!,slot=(i:number)=>document.querySelector<HTMLButtonElement>(`.sc-slot[data-slot="${i}"]`)!;
+  const first=puzzle.words[0];expect([...document.querySelectorAll('.sc-tile')].map(t=>t.textContent).join('')).toBe(first.letters.join(''));expect(screen.getByText(`0 of ${total}`)).toBeTruthy();
+  // Tapping the tiles in their mixed-up order spells something that is not a word.
+  for(let i=0;i<first.letters.length;i++)await user.click(tile(i));expect(screen.getByRole('status').textContent).toMatch(/Not a word yet/);expect(document.querySelector('.sc-slots')!.className).toContain('off');
+  await user.click(slot(first.letters.length-1));expect(slot(first.letters.length-1).textContent).toBe('');await user.click(screen.getByRole('button',{name:'Clear'}));expect(slot(0).textContent).toBe('');
+  await user.click(screen.getByRole('button',{name:'Hint'}));expect(slot(0).textContent).toBe(first.word[0]);expect(slot(0).disabled).toBe(true);expect(screen.getByRole('status').textContent).toContain(`Letter 1 is ${first.word[0]}`);
+  await user.keyboard(first.word.slice(1));expect(screen.getByRole('status').textContent).toContain(`${first.word}! You unscrambled it.`);expect(SoundKit.prototype.play).toHaveBeenCalledWith('correct');
+  await user.click(screen.getByRole('button',{name:'Next word'}));
+  for(let i=1;i<total;i++){expect(screen.getByText(`${i} of ${total}`)).toBeTruthy();await user.keyboard(puzzle.words[i].word);await user.keyboard('{Enter}')}
+  expect(screen.getByText('words unscrambled')).toBeTruthy();expect(screen.getByText('word with a hint')).toBeTruthy();expect(screen.getByText(/New badge: Letter untangler/)).toBeTruthy();
+  expect(loadProgress(localStorage).results[0]).toMatchObject({activity:'scramble',correct:total-1,total,settings:{difficulty:'Easy',theme:'fruits',count:total}});
+  view.unmount();render(<App/>);await user.click(screen.getByRole('button',{name:'My progress'}));expect(screen.getByText('Word scramble')).toBeTruthy();expect(screen.getByText(/Easy · Fruits · 5 words/)).toBeTruthy();expect(screen.getByText('4 of 5 without hints')).toBeTruthy();
+ });
+ it('finds missing numbers in patterns, counting only first tries',async()=>{
+  const user=userEvent.setup();render(<App/>);
+  await user.click(screen.getByRole('button',{name:/Number patterns/}));await user.click(screen.getByRole('button',{name:/Medium/}));await user.click(screen.getByRole('button',{name:'Spot the patterns!'}));
+  const puzzle=generatePatterns({difficulty:'Medium'}),total=puzzle.patterns.length;expect(total).toBe(8);
+  const choice=(n:number)=>within(screen.getByRole('group',{name:'Choose the missing number'})).getByRole('button',{name:new RegExp(`^${n}(,|$)`)}) as HTMLButtonElement;
+  const first=puzzle.patterns[0],wrong=first.choices.find(n=>n!==first.answer)!;
+  expect([...document.querySelectorAll('.pt-row li')].map(li=>li.textContent)).toEqual(first.terms.map((n,i)=>i===first.blank?'?':String(n)));
+  await user.click(choice(wrong));expect(screen.getByRole('status').textContent).toMatch(/Not that one/);expect(choice(wrong).disabled).toBe(true);
+  await user.click(choice(first.answer));expect(screen.getByRole('status').textContent).toContain(`${first.answer} is right!`);expect(document.querySelector('.pt-row li.blank')!.textContent).toBe(String(first.answer));await user.click(screen.getByRole('button',{name:'Next pattern'}));
+  // A hint shows the rule and also costs the first-try point.
+  await user.click(screen.getByRole('button',{name:'Hint'}));expect(screen.getByText(puzzle.patterns[1].rule)).toBeTruthy();await user.click(choice(puzzle.patterns[1].answer));await user.keyboard('{Enter}');
+  for(let i=2;i<total;i++){expect(screen.getByText(`${i} of ${total}`)).toBeTruthy();await user.click(choice(puzzle.patterns[i].answer));await user.click(screen.getByRole('button',{name:i+1===total?'See my stars':'Next pattern'}))}
+  expect(screen.getByText('right on the first try')).toBeTruthy();expect(screen.getByText(/New badge: Pattern spotter/)).toBeTruthy();
+  expect(loadProgress(localStorage).results[0]).toMatchObject({activity:'patterns',correct:total-2,total,stars:2,settings:{difficulty:'Medium',count:total}});expect(loadProgress(localStorage).results[0].settings).not.toHaveProperty('theme');
+ });
+ it('solves a mini crossword from its clues with typing, a hint, and the letter keyboard',async()=>{
+  const user=userEvent.setup();const view=render(<App/>);
+  await user.click(screen.getByRole('button',{name:/Crossword/}));await user.click(screen.getByRole('button',{name:/^Yummy foods/}));await user.click(screen.getByRole('button',{name:'Solve the clues!'}));
+  const cw=generateCrossword({theme:'foods',difficulty:'Easy'}),total=cw.entries.length;expect(total).toBe(4);
+  const cell=(c:number)=>document.querySelector<HTMLButtonElement>(`.cw-cell[data-cell="${c}"]`)!,clue=(i:number)=>screen.getByRole('button',{name:new RegExp(`^${cw.entries[i].number} ${cw.entries[i].clue.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}$`)});
+  expect(document.querySelectorAll('.cw-cell')).toHaveLength(cw.letters.filter(Boolean).length);expect(screen.getByText(`0 of ${total}`)).toBeTruthy();
+  const filled=new Set<number>();
+  // First word: one hinted letter, one wrong letter fixed with erase, the rest from the on-screen keyboard.
+  const first=cw.entries[0];await user.click(clue(0));await user.click(screen.getByRole('button',{name:'Hint'}));expect(cell(first.cells[0]).textContent).toContain(first.word[0]);expect(cell(first.cells[0]).className).toContain('hinted');
+  const helped=cw.entries.filter(e=>e.cells.includes(first.cells[0])).length;
+  const keys=within(screen.getByRole('group',{name:'Letter keyboard'})),wrongLetter=first.word[1]==='Q'?'Z':'Q';
+  await user.click(keys.getByRole('button',{name:wrongLetter}));expect(cell(first.cells[1]).textContent).toContain(wrongLetter);await user.click(keys.getByRole('button',{name:'Erase letter'}));await user.click(keys.getByRole('button',{name:'Erase letter'}));expect(cell(first.cells[1]).textContent).not.toContain(wrongLetter);
+  for(const letter of first.word.slice(1))await user.click(keys.getByRole('button',{name:letter}));
+  first.cells.forEach(c=>filled.add(c));expect(screen.getByText(`1 of ${total}`)).toBeTruthy();expect(cell(first.cells[1]).className).toContain('locked');expect(screen.getByRole('status').textContent).toContain(`${first.word} fits!`);
+  // Other words: pick the clue and type only the letters still missing; crossing letters are already there.
+  for(let i=1;i<total;i++){const e=cw.entries[i];await user.click(clue(i));await user.keyboard(e.cells.flatMap((c,k)=>filled.has(c)?[]:[e.word[k]]).join(''));e.cells.forEach(c=>filled.add(c))}
+  expect(screen.getByText(`${total} of ${total}`)).toBeTruthy();expect(screen.getByRole('status').textContent).toContain('You finished the crossword');expect(screen.queryByRole('group',{name:'Letter keyboard'})).toBe(null);
+  await user.click(screen.getByRole('button',{name:'See my stars'}));expect(screen.getByText('words solved')).toBeTruthy();expect(screen.getByText(/New badge: Clue cracker/)).toBeTruthy();
+  expect(loadProgress(localStorage).results[0]).toMatchObject({activity:'crossword',correct:total-helped,total,settings:{difficulty:'Easy',theme:'foods',count:total}});
+  view.unmount();render(<App/>);await user.click(screen.getByRole('button',{name:'My progress'}));expect(screen.getByText('Crossword')).toBeTruthy();expect(screen.getByText(/Easy · Yummy foods · 4 words/)).toBeTruthy();
+ });
+ it('paints a mystery picture by number and counts a wrong tap',async()=>{
+  const user=userEvent.setup();render(<App/>);
+  await user.click(screen.getByRole('button',{name:/Color by number/}));await user.click(screen.getByRole('button',{name:/Challenge/}));await user.click(screen.getByRole('button',{name:'Start painting!'}));
+  const puzzle=generateColoring({difficulty:'Challenge'}),squares=puzzle.cells.flatMap((c,i)=>c?[i]:[]);
+  const cell=(i:number)=>document.querySelector<HTMLButtonElement>(`.cb-cell[data-i="${i}"]`)!,brush=(n:number)=>within(screen.getByRole('group',{name:'Colors'})).getByRole('button',{name:new RegExp(`^${n}:`)});
+  expect(document.querySelectorAll('.cb-cell')).toHaveLength(squares.length);expect(cell(squares[0]).textContent).toBe(puzzle.cells[squares[0]]!.text);expect(screen.getByText(`0 of ${squares.length}`)).toBeTruthy();
+  // The first color is selected to begin with; tapping a square that belongs to another color is a mistake.
+  const first=puzzle.colors[0],other=squares.find(i=>puzzle.cells[i]!.key!==first.key)!;
+  await user.click(cell(other));expect(screen.getByRole('status').textContent).toContain(`That square is not ${first.number}`);expect(cell(other).className).toContain('missed');expect(screen.getByText(`0 of ${squares.length}`)).toBeTruthy();expect(SoundKit.prototype.play).toHaveBeenCalledWith('tryAgain');
+  for(const color of puzzle.colors){await user.click(brush(color.number));for(const i of squares.filter(i=>puzzle.cells[i]!.key===color.key))await user.click(cell(i))}
+  expect(screen.getByRole('status').textContent).toContain(puzzle.name);expect(screen.queryByRole('group',{name:'Colors'})).toBe(null);expect(cell(other).textContent).toBe('');
+  await user.click(screen.getByRole('button',{name:'See my stars'}));expect(screen.getByText('squares painted')).toBeTruthy();expect(screen.getByText(/New badge: Super artist/)).toBeTruthy();
+  expect(loadProgress(localStorage).results[0]).toMatchObject({activity:'colors',total:10,correct:Math.round(10*(squares.length-1)/squares.length),settings:{difficulty:'Challenge',count:squares.length}});
+ });
+ it('prints worksheets for the scramble, patterns, crossword, and coloring activities',async()=>{
+  const user=userEvent.setup();const print=vi.spyOn(window,'print').mockImplementation(()=>{});render(<App/>);await user.click(screen.getByRole('button',{name:'Worksheets'}));
+  expect(within(screen.getByRole('group',{name:'Worksheet type'})).getAllByRole('button')).toHaveLength(8);
+  await user.click(screen.getByRole('button',{name:/Word scramble/}));await user.selectOptions(screen.getByLabelText('Theme'),'space');await user.selectOptions(screen.getByLabelText('Level'),'Medium');await user.click(screen.getByRole('button',{name:'Generate fresh'}));
+  const scramble=generateScramble({theme:'space',difficulty:'Medium'});expect(screen.getByText(/My word scramble: Solar system/)).toBeTruthy();expect([...document.querySelectorAll('.sc-sheet-mix')].map(m=>m.textContent!.replace(/ /g,''))).toEqual(scramble.words.map(w=>w.letters.join('')));
+  expect(document.querySelector('.answer-key')).toBe(null);await user.click(screen.getByLabelText('Include answer key'));expect([...document.querySelectorAll('.answer-key strong')].map(s=>s.textContent)).toEqual(scramble.words.map(w=>w.word));
+  await user.click(screen.getByRole('button',{name:/Number patterns/}));expect(screen.queryByLabelText('Theme')).toBe(null);await user.selectOptions(screen.getByLabelText('Level'),'Challenge');await user.click(screen.getByRole('button',{name:'Generate fresh'}));
+  const patterns=generatePatterns({difficulty:'Challenge'});expect(document.querySelectorAll('.pt-sheet-rows li')).toHaveLength(10);expect(document.querySelectorAll('.pt-sheet-rows .blank')).toHaveLength(10);expect([...document.querySelectorAll('.answer-key strong')].map(s=>s.textContent)).toEqual(patterns.patterns.map(p=>String(p.answer)));
+  await user.click(screen.getByRole('button',{name:/Crossword/}));const cw=generateCrossword({theme:'animals',difficulty:'Easy'});
+  expect(screen.getByText(/My crossword: Animals/)).toBeTruthy();expect([...document.querySelectorAll('.cw-sheet .cw-clues i')].map(i=>i.textContent)).toEqual(cw.entries.map(e=>`(${e.word.length} letters)`));
+  expect(document.querySelectorAll('.cw-sheet .cw-paper:not(.answers) .cw-cell')).toHaveLength(cw.letters.filter(Boolean).length);expect([...document.querySelectorAll('.cw-sheet .cw-paper:not(.answers) .cw-cell')].every(c=>!/[A-Z]/.test(c.textContent!))).toBe(true);
+  expect([...document.querySelectorAll('.cw-sheet-key .cw-cell')].map(c=>c.textContent!.replace(/\d/g,'')).join('')).toBe(cw.letters.filter(Boolean).join(''));
+  await user.click(screen.getByRole('button',{name:/Color by number/}));const art=generateColoring({difficulty:'Easy'});
+  expect(screen.getByText(/My color by number/)).toBeTruthy();expect(document.querySelectorAll('.cb-key li')).toHaveLength(art.colors.length);expect(document.querySelectorAll('.cb-sheet .cb-paper:not(.answers) .cb-cell')).toHaveLength(art.cells.filter(Boolean).length);expect(screen.getByText(new RegExp(`Answer key · It’s an? ${art.name}!`))).toBeTruthy();
   await user.click(screen.getByRole('button',{name:'Print worksheet'}));expect(print).toHaveBeenCalledOnce();
  });
 });

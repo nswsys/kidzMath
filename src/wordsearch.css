@@ -1,6 +1,6 @@
 /* Activity switch on the home screen */
 .activity-switch{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 16px}
-.activity-switch button{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 14px;min-height:60px;background:#fffefa;border:3px solid #d9d0ea;border-radius:18px;box-shadow:0 4px 0 #d4c4e466;color:#5c457b}
+.activity-switch button{display:flex;align-items:center;gap:10px;text-align:left;padding:8px 12px;min-height:56px;background:#fffefa;border:3px solid #d9d0ea;border-radius:18px;box-shadow:0 4px 0 #d4c4e466;color:#5c457b}
 .activity-switch button.chosen{background:#ece1ff;border-color:#9380bd;box-shadow:0 4px 0 #b7a3d5}
 .activity-switch .activity-icon{font-size:26px;line-height:1}
 .activity-switch strong{display:block;font-family:'Outfit',sans-serif;font-size:16px;font-weight:600}
@@ -35,8 +35,9 @@
 .ws-words li.found{text-decoration:line-through;text-decoration-thickness:2px;color:#5b4a3a}
 .ws-status{font-size:13px;line-height:1.45;color:#7f619d;text-align:center;min-height:38px;display:flex;align-items:center;justify-content:center}
 .ws-cheer{display:flex;align-items:center;gap:10px;text-align:left}
-.ws-cheer .reaction-mascot{width:70px;height:78px;flex-shrink:0;display:block}
-.ws-cheer .reaction-mascot svg{width:100%;height:100%}
+.ws-cheer .cheer-buddy{width:70px;height:82px;flex:0 0 70px;display:block}
+.ws-cheer .cheer-buddy svg{width:100%;height:100%}
+.ws-cheer>div{min-width:0}
 .ws-cheer strong{display:block}
 .ws-side .primary.full{width:100%;background:#ffda54;color:#674721}
 
@@ -49,10 +50,11 @@
  .ws-words-head{min-height:40px}
 }
 @media(max-width:600px){
- .activity-switch{gap:6px;margin-bottom:10px}
- .activity-switch button{flex-direction:column;justify-content:center;text-align:center;padding:7px 4px;gap:3px;min-height:62px;border-radius:15px}
- .activity-switch .activity-icon{font-size:22px}
- .activity-switch strong{font-size:11.5px;line-height:1.15}
+ .activity-switch{gap:5px;margin-bottom:8px}
+ .activity-switch button{flex-direction:column;justify-content:center;text-align:center;padding:5px 3px;gap:2px;min-height:54px;border-radius:13px;border-width:2px;box-shadow:0 3px 0 #d4c4e466}
+ .activity-switch button.chosen{box-shadow:0 3px 0 #b7a3d5}
+ .activity-switch .activity-icon{font-size:19px}
+ .activity-switch strong{font-size:10.5px;line-height:1.1}
  .activity-switch small{display:none}
  .ws-themes{gap:7px;margin-bottom:14px}
  .ws-themes button{min-height:64px;border-radius:13px}
@@ -75,7 +77,7 @@
 .ws-cheer .cheer-title{color:#7860df;font-family:'Outfit',sans-serif;font-size:19px;font-weight:700;line-height:1.2}
 
 /* Printable word search worksheet */
-.sheet-kinds{max-width:680px;margin-bottom:18px}
+.segments.sheet-kinds{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));max-width:760px;margin-bottom:18px}
 .worksheet-settings.ws-sheet-settings{grid-template-columns:repeat(2,minmax(0,1fr));max-width:560px}
 .ws-sheet-board{container-type:inline-size;width:100%;max-width:520px;margin:0 auto 26px}
 .ws-sheet-grid{display:grid;border:2px solid #3f3358;border-radius:10px;padding:1.5cqw;background:white}

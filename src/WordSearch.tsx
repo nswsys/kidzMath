@@ -57,7 +57,7 @@ export function WordSearchGame({puzzle,play,onLeave,onFinish}:{puzzle:Puzzle;pla
    <aside className="ws-side">
     <div className="ws-words-head"><span className="eyebrow green">WORDS TO FIND</span>{!done&&<button className="hint-button" onClick={hint}><Lightbulb size={18}/><span>Hint</span></button>}</div>
     <ul className="ws-words" aria-label="Words to find">{puzzle.placements.map(p=>{const i=foundWords.indexOf(p.word);return <li key={p.word} className={i>=0?'found':''} style={i>=0?{background:colors[i%colors.length]}:undefined}>{p.word}{i>=0&&<><Check size={14} aria-hidden="true"/><span className="sr-only"> found</span></>}</li>})}</ul>
-    <div className="ws-status" role="status">{done?<div className="ws-cheer"><span className="reaction-mascot" aria-hidden="true"><Mascot happy/></span><div><strong className="cheer-title">Word wizard!</strong><span>{message}</span></div></div>:<span>{message||'Drag across a word, or tap its first and last letter.'}</span>}</div>
+    <div className="ws-status" role="status">{done?<div className="ws-cheer"><span className="cheer-buddy" aria-hidden="true"><Mascot happy/></span><div><strong className="cheer-title">Word wizard!</strong><span>{message}</span></div></div>:<span>{message||'Drag across a word, or tap its first and last letter.'}</span>}</div>
     {done&&<button className="primary full" onClick={()=>onFinish({total,solo:puzzle.placements.filter(p=>!hinted.includes(p.word)).length})}>See my stars <ArrowRight size={19}/></button>}
    </aside>
   </div>

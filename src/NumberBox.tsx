@@ -73,7 +73,7 @@ export function NumberBoxGame({box,play,onLeave,onFinish}:{box:Box;play:(cue:Cue
    <aside className="nb-side">
     <div className="ws-words-head"><span className="eyebrow green">NUMBERS 1 TO 9, ONCE EACH</span>{!done&&<button className="hint-button" onClick={hint}><Lightbulb size={18}/><span>Hint</span></button>}</div>
     {!done&&<div className="nb-pad" role="group" aria-label="Number pad">{[1,2,3,4,5,6,7,8,9].map(d=>{const fixed=values.some((v,i)=>v===d&&locked(i)),placed=!fixed&&values.includes(d);return <button key={d} type="button" disabled={fixed} aria-label={fixed?`${d}, already in the box`:placed?`${d}, placed`:String(d)} className={placed?'placed':''} onClick={()=>put(d)}>{d}</button>})}<button type="button" className="nb-erase" aria-label="Erase square" onClick={erase}><Delete size={20}/> Erase</button></div>}
-    <div className="ws-status" role="status">{done?<div className="ws-cheer"><span className="reaction-mascot" aria-hidden="true"><Mascot animal="bunny" happy/></span><div><strong className="cheer-title">Puzzle pro!</strong><span>Every row and column matches. You solved it!</span></div></div>:<span>{message||'Tap an empty square, then pick its number.'}</span>}</div>
+    <div className="ws-status" role="status">{done?<div className="ws-cheer"><span className="cheer-buddy" aria-hidden="true"><Mascot animal="bunny" happy/></span><div><strong className="cheer-title">Puzzle pro!</strong><span>Every row and column matches. You solved it!</span></div></div>:<span>{message||'Tap an empty square, then pick its number.'}</span>}</div>
     {done&&<button className="primary full" onClick={()=>onFinish({total:blanks.length,solo:blanks.length-hinted.length})}>See my stars <ArrowRight size={19}/></button>}
    </aside>
   </div>

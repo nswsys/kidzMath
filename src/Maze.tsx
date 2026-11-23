@@ -80,7 +80,7 @@ export function MazeGame({maze,play,onLeave,onFinish}:{maze:Maze;play:(cue:Cue)=
     <div className="ws-words-head"><span className="eyebrow green">{theme.mission.toUpperCase()}</span></div>
     {!done&&<div className="mz-pad" role="group" aria-label="Move">{([['up',ArrowUp],['left',ArrowLeft],['right',ArrowRight],['down',ArrowDown]] as const).map(([d,Icon])=><button key={d} type="button" className={`mz-${d}`} aria-label={`Move ${d}`} onClick={()=>move(d)}><Icon size={26}/></button>)}</div>}
     {!done&&<div className="mz-tools"><button className="hint-button" onClick={showHint}><Lightbulb size={18}/><span>Hint</span></button><button className="hint-button" onClick={restart} disabled={trail.length<2}><RotateCcw size={17}/><span>Start over</span></button></div>}
-    <div className="ws-status" role="status">{done?<div className="ws-cheer"><span className="reaction-mascot" aria-hidden="true"><Mascot happy/></span><div><strong className="cheer-title">Maze master!</strong><span>{message}</span></div></div>:<span>{message||'Drag along the path, or use the arrows.'}</span>}</div>
+    <div className="ws-status" role="status">{done?<div className="ws-cheer"><span className="cheer-buddy" aria-hidden="true"><Mascot happy/></span><div><strong className="cheer-title">Maze master!</strong><span>{message}</span></div></div>:<span>{message||'Drag along the path, or use the arrows.'}</span>}</div>
     {done&&<button className="primary full" onClick={()=>onFinish({hints,steps:total})}>See my stars <ArrowRight size={19}/></button>}
    </aside>
   </div>

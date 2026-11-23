@@ -1,6 +1,6 @@
 # kidzMath
 
-A gentle, playful activity app for ages 6–10, with original SVG buddies Milo the puppy and Luna the bunny. It started as a math adventure and now also offers themed word searches, number box puzzles, and mazes; the home screen lets children switch between activities. All student-facing content is English.
+A gentle, playful activity app for ages 6–10, with original SVG buddies Milo the puppy and Luna the bunny. It started as a math adventure and now also offers word searches, word scrambles, mini crosswords, number boxes, number patterns, color by number, and mazes; the home screen lets children switch between activities. All student-facing content is English.
 
 ## Local development
 
@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open the development URL at `/kidzMath/`. Run `npm test` for arithmetic, word search, number box, and maze generation, validation, scoring, and persistence tests. Run `npm run build` for the TypeScript check and production build; `npm run preview` serves the built app at `/kidzMath/`.
+Open the development URL at `/kidzMath/`. Run `npm test` for arithmetic, puzzle generation for every activity, validation, scoring, and persistence tests. Run `npm run build` for the TypeScript check and production build; `npm run preview` serves the built app at `/kidzMath/`.
 
 ## Playground experience
 
@@ -55,9 +55,21 @@ Mazes are generated on the device. Every maze has exactly one route between any 
 
 A maze has no wrong answers, so stars depend on hints: no hints earns 3 stars, one or two hints earn 2, and more earn 1. Results are saved with `activity: 'maze'`, appear in the dashboard, and unlock the Pathfinder badge.
 
+## Word scramble, number patterns, crossword, and color by number
+
+These four activities share one registry (`src/activities.tsx`): each entry supplies its setup choices, a generator, the game, the printable page, a badge, and how a saved result is described. Adding another activity of this kind means adding one entry there plus its id in `extraActivities` in `src/progress.ts`. Results are saved with `activity` set to `scramble`, `patterns`, `crossword`, or `colors`.
+
+**Word scramble** mixes up the letters of words from the eight word search themes. Easy has 5 words of up to 5 letters, Medium 6 of up to 7, Challenge 8 of up to 10. Tap the tiles in order (or type); tap a placed letter to take it back. If the tiles can spell another word from the same theme (LEMON and MELON), that counts too. **Hint** places the next correct letter.
+
+**Number patterns** shows five numbers with one missing and four choices. Easy counts up by 1, 2, 5, or 10; Medium goes up or down by 2, 3, 4, 5, or 10; Challenge adds bigger steps, jumps that grow by one, and doubling. Easy has 6 patterns, Medium 8, Challenge 10. Only patterns answered on the first try without the hint count toward stars. **Hint** shows the rule.
+
+**Crossword** builds a small crossword from a bank of 20 clued words per theme (Animals, Yummy foods, Sky & nature) in `src/crossword.ts`: 4 words on Easy, 6 on Medium, 8 on Challenge. Every word crosses another and no stray words are formed. Tap a square or a clue, then use the on-screen letters or a keyboard; a finished word turns green and locks. **Hint** reveals one letter.
+
+**Color by number** hides a pixel picture (heart, fish, rocket, flower, house, tree, or sunny face). Each color has its own answer. Easy squares show the number itself, Medium squares show additions up to 10, and Challenge squares show additions and subtractions within 20. Pick a color, then tap or drag across the squares with that answer. Tapping a square with the wrong color counts as a mistake; dragging over other squares does not. Stars use the share of squares painted without a mistake.
+
 ## Worksheets
 
-Choose **Math**, **Word search**, **Number boxes**, or **Mazes**, pick your options, select **Generate fresh**, and print. A word search worksheet has the letter grid, a tick-off word list, and a line saying which directions words can go; its answer key repeats the grid with the hidden words shaded. A number box worksheet has four fresh boxes; its answer key shows them filled in with the answers shaded. A maze worksheet has one large maze; its answer key draws the way through. The optional answer key starts on a new printed page. Printing works through the system print dialog, including Save as PDF where available. No names are entered or stored by the app; the printed name line is for pencil use.
+Choose any of the eight activities, pick your options, select **Generate fresh**, and print. A word search worksheet has the letter grid, a tick-off word list, and a line saying which directions words can go; its answer key repeats the grid with the hidden words shaded. A number box worksheet has four fresh boxes; its answer key shows them filled in with the answers shaded. A maze worksheet has one large maze; its answer key draws the way through. Word scramble and number pattern worksheets list the items with space to write and give the answers on the key. A crossword worksheet has the empty grid and clues, with the filled grid as its key. A color by number worksheet has the grid of numbers or sums and a color key, with the finished picture as its answer key. The optional answer key starts on a new printed page. Printing works through the system print dialog, including Save as PDF where available. No names are entered or stored by the app; the printed name line is for pencil use.
 
 ## PWA and offline use
 
