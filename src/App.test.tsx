@@ -8,6 +8,7 @@ import {WELCOME_KEY} from './Playground';
 import {SoundKit} from './sounds';
 import {defaults,score} from './math';
 import {generatePuzzle} from './wordsearch';
+import {generateBox} from './numberbox';
 function answer(){const t=document.querySelector('.math-question')!.textContent!;const m=t.match(/(\d+)\s*([+−])\s*(\d+)/)!;return String(m[2]==='+'?Number(m[1])+Number(m[3]):Number(m[1])-Number(m[3]));}
 beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});localStorage.clear();sessionStorage.clear();sessionStorage.setItem(WELCOME_KEY,'seen');vi.spyOn(SoundKit.prototype,'play').mockReturnValue(true);vi.spyOn(SoundKit.prototype,'stop').mockImplementation(()=>{});vi.spyOn(Math,'random').mockReturnValue(.2);HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','')};HTMLDialogElement.prototype.close=function(){this.removeAttribute('open')}});
 afterEach(()=>{cleanup();vi.restoreAllMocks()});
@@ -137,5 +138,37 @@ describe('complete learning flows',()=>{
   expect(document.querySelectorAll('.ws-sheet-key .answer')).toHaveLength(new Set(puzzle.placements.flatMap(p=>p.cells.map(c=>`${c.r}-${c.c}`))).size);
   await user.click(screen.getByRole('button',{name:'Print worksheet'}));expect(print).toHaveBeenCalledOnce();
   await user.click(screen.getByRole('button',{name:/Math/}));expect(document.querySelector('.worksheet-problems')).toBeTruthy();expect(screen.getByLabelText('Questions')).toBeTruthy();
+ });
+ it('solves an add-and-subtract number box with the pad, a moved number, and a hint',async()=>{
+  const user=userEvent.setup();const view=render(<App/>);
+  await user.click(screen.getByRole('button',{name:/Number boxes/}));expect(screen.getByRole('region',{name:'Choose your number box'})).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:/^Add & subtract/}));await user.click(screen.getByRole('button',{name:/Medium/}));await user.click(screen.getByRole('button',{name:'Solve the puzzle!'}));
+  // Math.random is pinned in these tests, so the same call reproduces the box on screen.
+  const box=generateBox({difficulty:'Medium',operation:'Mixed'});const blanks=box.given.flatMap((g,i)=>g?[]:[i]);expect(blanks.length).toBeGreaterThanOrEqual(3);
+  const cell=(i:number)=>document.querySelector<HTMLButtonElement>(`.nb-cell[data-cell="${i}"]`)!;const pad=(d:number)=>within(screen.getByRole('group',{name:'Number pad'})).getByRole('button',{name:new RegExp(`^${d}\\b`)});
+  expect(document.querySelectorAll('.nb-cell.blank')).toHaveLength(blanks.length);expect(document.querySelectorAll('.nb-cell.given')).toHaveLength(9-blanks.length);expect(screen.getByText(`0 of ${blanks.length}`)).toBeTruthy();
+  const givenDigit=box.solution[box.given.indexOf(true)];expect((pad(givenDigit) as HTMLButtonElement).disabled).toBe(true);
+  const [first,second,...rest]=blanks;
+  // Put the first answer in the wrong square, then move it by placing it again.
+  await user.click(cell(second));await user.click(pad(box.solution[first]));expect(cell(second).textContent).toBe(String(box.solution[first]));
+  await user.click(cell(first));await user.click(pad(box.solution[first]));expect(cell(first).textContent).toBe(String(box.solution[first]));expect(cell(second).textContent).toBe('');
+  await user.click(cell(second));await user.click(screen.getByRole('button',{name:'Hint'}));expect(cell(second).textContent).toBe(String(box.solution[second]));expect(cell(second).disabled).toBe(true);expect(screen.getByRole('status').textContent).toMatch(/belongs in that glowing square|solved/);
+  expect(screen.queryByRole('button',{name:'See my stars'})).toBe(null);
+  // Physical keys work too.
+  for(const i of rest){await user.click(cell(i));await user.keyboard(String(box.solution[i]))}
+  expect(screen.getByRole('status').textContent).toContain('You solved it!');expect(document.querySelectorAll('.nb-target.ok')).toHaveLength(6);expect(screen.queryByRole('group',{name:'Number pad'})).toBe(null);expect(SoundKit.prototype.play).toHaveBeenCalledWith('correct');
+  await user.click(screen.getByRole('button',{name:'See my stars'}));expect(screen.getByText('squares filled')).toBeTruthy();expect(screen.getByText('hint used')).toBeTruthy();expect(screen.getByText(/New badge: Puzzle pro/)).toBeTruthy();
+  expect(loadProgress(localStorage).results[0]).toMatchObject({activity:'numberbox',correct:blanks.length-1,total:blanks.length,settings:{operation:'Mixed',difficulty:'Medium',count:blanks.length}});
+  view.unmount();render(<App/>);await user.click(screen.getByRole('button',{name:'My progress'}));expect(screen.getByText('Number box')).toBeTruthy();expect(screen.getByText(new RegExp(`Medium · Add & subtract · ${blanks.length} squares`))).toBeTruthy();
+ });
+ it('prints four number boxes with a filled-in answer key',async()=>{
+  const user=userEvent.setup();const print=vi.spyOn(window,'print').mockImplementation(()=>{});render(<App/>);await user.click(screen.getByRole('button',{name:'Worksheets'}));await user.click(screen.getByRole('button',{name:/Number boxes/}));
+  expect(screen.getByText(/My number boxes/)).toBeTruthy();expect(document.querySelectorAll('.nb-sheet-boxes li')).toHaveLength(4);expect(screen.queryByText(/left to right/)).toBe(null);
+  await user.selectOptions(screen.getByLabelText('Puzzle'),'Mixed');await user.selectOptions(screen.getByLabelText('Level'),'Challenge');await user.click(screen.getByRole('button',{name:'Generate fresh'}));
+  const box=generateBox({difficulty:'Challenge',operation:'Mixed'});expect(screen.getByText(/left to right/)).toBeTruthy();
+  const sheet=document.querySelector('.nb-sheet-boxes li')!;expect(sheet.querySelectorAll('.nb-cell.blank')).toHaveLength(box.given.filter(g=>!g).length);expect([...sheet.querySelectorAll('.nb-target')].map(t=>t.textContent)).toEqual([...box.rows,...box.cols].map(l=>String(l.target)));
+  expect(document.querySelector('.nb-sheet-key')).toBe(null);await user.click(screen.getByLabelText('Include answer key'));
+  expect([...document.querySelector('.nb-sheet-key li')!.querySelectorAll('.nb-cell')].map(c=>c.textContent)).toEqual(box.solution.map(String));
+  await user.click(screen.getByRole('button',{name:'Print worksheet'}));expect(print).toHaveBeenCalledOnce();
  });
 });

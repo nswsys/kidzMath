@@ -1,5 +1,5 @@
 /* Activity switch on the home screen */
-.activity-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 16px;max-width:560px}
+.activity-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 16px;max-width:840px}
 .activity-switch button{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 14px;min-height:60px;background:#fffefa;border:3px solid #d9d0ea;border-radius:18px;box-shadow:0 4px 0 #d4c4e466;color:#5c457b}
 .activity-switch button.chosen{background:#ece1ff;border-color:#9380bd;box-shadow:0 4px 0 #b7a3d5}
 .activity-switch .activity-icon{font-size:26px;line-height:1}
@@ -50,9 +50,9 @@
 }
 @media(max-width:600px){
  .activity-switch{gap:8px;margin-bottom:10px}
- .activity-switch button{padding:8px 10px;gap:8px;min-height:54px;border-radius:15px}
+ .activity-switch button{flex-direction:column;justify-content:center;text-align:center;padding:7px 4px;gap:3px;min-height:62px;border-radius:15px}
  .activity-switch .activity-icon{font-size:22px}
- .activity-switch strong{font-size:14px}
+ .activity-switch strong{font-size:12.5px;line-height:1.15}
  .activity-switch small{display:none}
  .ws-themes{gap:7px;margin-bottom:14px}
  .ws-themes button{min-height:64px;border-radius:13px}
@@ -75,7 +75,7 @@
 .ws-cheer .cheer-title{color:#7860df;font-family:'Outfit',sans-serif;font-size:19px;font-weight:700;line-height:1.2}
 
 /* Printable word search worksheet */
-.sheet-kinds{max-width:360px;margin-bottom:18px}
+.sheet-kinds{max-width:520px;margin-bottom:18px}
 .worksheet-settings.ws-sheet-settings{grid-template-columns:repeat(2,minmax(0,1fr));max-width:560px}
 .ws-sheet-board{container-type:inline-size;width:100%;max-width:520px;margin:0 auto 26px}
 .ws-sheet-grid{display:grid;border:2px solid #3f3358;border-radius:10px;padding:1.5cqw;background:white}

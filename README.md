@@ -1,6 +1,6 @@
 # kidzMath
 
-A gentle, playful activity app for ages 6–10, with original SVG buddies Milo the puppy and Luna the bunny. It started as a math adventure and now also offers themed word searches; the home screen lets children switch between activities. All student-facing content is English.
+A gentle, playful activity app for ages 6–10, with original SVG buddies Milo the puppy and Luna the bunny. It started as a math adventure and now also offers themed word searches and number box puzzles; the home screen lets children switch between activities. All student-facing content is English.
 
 ## Local development
 
@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open the development URL at `/kidzMath/`. Run `npm test` for arithmetic, word search generation, validation, scoring, and persistence tests. Run `npm run build` for the TypeScript check and production build; `npm run preview` serves the built app at `/kidzMath/`.
+Open the development URL at `/kidzMath/`. Run `npm test` for arithmetic, word search and number box generation, validation, scoring, and persistence tests. Run `npm run build` for the TypeScript check and production build; `npm run preview` serves the built app at `/kidzMath/`.
 
 ## Playground experience
 
@@ -39,9 +39,17 @@ Find a word by dragging across it, or by tapping its first and then its last let
 
 Finishing a puzzle earns stars with the same rules as math, counting words found without a hint as first-attempt answers, plus 10 points per word found without a hint. Results are saved in the same progress store as math games (marked `activity: 'wordsearch'`), appear in the dashboard, and unlock the Word detective badge.
 
+## Number boxes
+
+Choose **Number boxes** on the home screen. Each puzzle is a 3×3 box that uses the numbers 1 to 9 once each; some squares are filled in, and every row and column must match the answer shown outside the box. **Addition** uses only plus signs. **Add & subtract** gives each line one plus and one minus where the numbers allow it; signs are worked left to right, and no line ever dips below zero. Easy leaves 3 squares empty, Medium 5, and Challenge 7.
+
+Puzzles are generated on the device (`src/numberbox.ts`) and are only used when they have exactly one answer. Tap an empty square, then a number on the pad, or type the number on a keyboard. Placing a number that is already in another square moves it, and numbers already printed in the box are crossed out on the pad. The answer beside a finished line turns green when it matches and orange when it does not. **Hint** fills one square correctly.
+
+Stars follow the same rules as the other activities, counting squares filled without a hint as first-attempt answers. Results are saved with `activity: 'numberbox'`, appear in the dashboard, and unlock the Puzzle pro badge.
+
 ## Worksheets
 
-Choose **Math** or **Word search**, pick your options, select **Generate fresh**, and print. A word search worksheet has the letter grid, a tick-off word list, and a line saying which directions words can go; its answer key repeats the grid with the hidden words shaded. The optional answer key starts on a new printed page. Printing works through the system print dialog, including Save as PDF where available. No names are entered or stored by the app; the printed name line is for pencil use.
+Choose **Math**, **Word search**, or **Number boxes**, pick your options, select **Generate fresh**, and print. A word search worksheet has the letter grid, a tick-off word list, and a line saying which directions words can go; its answer key repeats the grid with the hidden words shaded. A number box worksheet has four fresh boxes; its answer key shows them filled in with the answers shaded. The optional answer key starts on a new printed page. Printing works through the system print dialog, including Save as PDF where available. No names are entered or stored by the app; the printed name line is for pencil use.
 
 ## PWA and offline use
 
