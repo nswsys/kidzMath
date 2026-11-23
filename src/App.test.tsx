@@ -9,6 +9,7 @@ import {SoundKit} from './sounds';
 import {defaults,score} from './math';
 import {generatePuzzle} from './wordsearch';
 import {generateBox} from './numberbox';
+import {directionTo,directions,generateMaze,step} from './maze';
 function answer(){const t=document.querySelector('.math-question')!.textContent!;const m=t.match(/(\d+)\s*([+−])\s*(\d+)/)!;return String(m[2]==='+'?Number(m[1])+Number(m[3]):Number(m[1])-Number(m[3]));}
 beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});localStorage.clear();sessionStorage.clear();sessionStorage.setItem(WELCOME_KEY,'seen');vi.spyOn(SoundKit.prototype,'play').mockReturnValue(true);vi.spyOn(SoundKit.prototype,'stop').mockImplementation(()=>{});vi.spyOn(Math,'random').mockReturnValue(.2);HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','')};HTMLDialogElement.prototype.close=function(){this.removeAttribute('open')}});
 afterEach(()=>{cleanup();vi.restoreAllMocks()});
@@ -169,6 +170,35 @@ describe('complete learning flows',()=>{
   const sheet=document.querySelector('.nb-sheet-boxes li')!;expect(sheet.querySelectorAll('.nb-cell.blank')).toHaveLength(box.given.filter(g=>!g).length);expect([...sheet.querySelectorAll('.nb-target')].map(t=>t.textContent)).toEqual([...box.rows,...box.cols].map(l=>String(l.target)));
   expect(document.querySelector('.nb-sheet-key')).toBe(null);await user.click(screen.getByLabelText('Include answer key'));
   expect([...document.querySelector('.nb-sheet-key li')!.querySelectorAll('.nb-cell')].map(c=>c.textContent)).toEqual(box.solution.map(String));
+  await user.click(screen.getByRole('button',{name:'Print worksheet'}));expect(print).toHaveBeenCalledOnce();
+ });
+ it('walks a themed maze with the arrow buttons and keys, bumps a wall, uses a hint, and saves stars',async()=>{
+  const user=userEvent.setup();const view=render(<App/>);
+  await user.click(screen.getByRole('button',{name:/Mazes/}));expect(screen.getByRole('region',{name:'Choose your maze'})).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:/^Space trip/}));await user.click(screen.getByRole('button',{name:'Enter the maze!'}));
+  // Math.random is pinned in these tests, so the same call reproduces the maze on screen.
+  const maze=generateMaze({theme:'space',difficulty:'Easy'}),route=maze.solution,total=route.length-1;expect(total).toBeGreaterThanOrEqual(11);
+  expect(screen.getByText(`${total} to go`)).toBeTruthy();expect(document.querySelectorAll('.mz-wall').length).toBeGreaterThan(24);expect(document.querySelector('.mz-trail')).toBe(null);
+  const blocked=directions.find(d=>step(maze,maze.start,d)<0)!;await user.click(screen.getByRole('button',{name:`Move ${blocked}`}));expect(screen.getByRole('status').textContent).toMatch(/There’s a wall/);expect(screen.getByText(`${total} to go`)).toBeTruthy();
+  const go=(i:number)=>directionTo(maze,route[i],route[i+1])!;
+  await user.click(screen.getByRole('button',{name:`Move ${go(0)}`}));await user.click(screen.getByRole('button',{name:`Move ${go(1)}`}));expect(screen.getByText(`${total-2} to go`)).toBeTruthy();expect(document.querySelector('.mz-trail')!.getAttribute('points')!.split(' ')).toHaveLength(3);
+  // Stepping back along the trail rubs it out.
+  await user.click(screen.getByRole('button',{name:`Move ${directionTo(maze,route[2],route[1])}`}));expect(screen.getByText(`${total-1} to go`)).toBeTruthy();expect(document.querySelector('.mz-trail')!.getAttribute('points')!.split(' ')).toHaveLength(2);
+  await user.click(screen.getByRole('button',{name:'Hint'}));expect(screen.getByRole('status').textContent).toContain(`Start by going ${go(1)}`);expect(document.querySelector('.mz-hint')).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:'Start over'}));expect(screen.getByText(`${total} to go`)).toBeTruthy();expect(document.querySelector('.mz-hint')).toBe(null);
+  const keyFor={up:'{ArrowUp}',right:'{ArrowRight}',down:'{ArrowDown}',left:'{ArrowLeft}'};
+  for(let i=0;i<total;i++){expect(screen.queryByRole('button',{name:'See my stars'})).toBe(null);await user.keyboard(keyFor[go(i)])}
+  expect(screen.getByText('Arrived!')).toBeTruthy();expect(screen.getByRole('status').textContent).toContain('You made it');expect(screen.queryByRole('group',{name:'Move'})).toBe(null);expect(SoundKit.prototype.play).toHaveBeenCalledWith('correct');
+  await user.click(screen.getByRole('button',{name:'See my stars'}));expect(screen.getByText('steps to the finish')).toBeTruthy();expect(screen.getByText('hint used')).toBeTruthy();expect(screen.getByText(/New badge: Pathfinder/)).toBeTruthy();
+  expect(loadProgress(localStorage).results[0]).toMatchObject({activity:'maze',correct:4,total:5,stars:2,points:40,settings:{theme:'space',difficulty:'Easy',count:total}});
+  view.unmount();render(<App/>);await user.click(screen.getByRole('button',{name:'My progress'}));expect(screen.getByText('Maze')).toBeTruthy();expect(screen.getByText(new RegExp(`Easy · Space trip · ${total} steps`))).toBeTruthy();expect(screen.getByText('1 hint')).toBeTruthy();
+ });
+ it('prints a maze with the way through on the answer key',async()=>{
+  const user=userEvent.setup();const print=vi.spyOn(window,'print').mockImplementation(()=>{});render(<App/>);await user.click(screen.getByRole('button',{name:'Worksheets'}));await user.click(screen.getByRole('button',{name:/Mazes/}));
+  expect(screen.getByText(/My maze: Busy bee/)).toBeTruthy();expect(document.querySelectorAll('.mz-sheet .mz-art')).toHaveLength(1);expect(document.querySelector('.mz-solution')).toBe(null);
+  await user.selectOptions(screen.getByLabelText('Mission'),'cheese');await user.selectOptions(screen.getByLabelText('Level'),'Challenge');await user.click(screen.getByRole('button',{name:'Generate fresh'}));
+  const maze=generateMaze({theme:'cheese',difficulty:'Challenge'});expect(screen.getByText(/My maze: Cheese chase/)).toBeTruthy();expect(screen.getByText(/Guide the mouse to the cheese!/)).toBeTruthy();
+  await user.click(screen.getByLabelText('Include answer key'));expect(document.querySelectorAll('.mz-sheet .mz-art')).toHaveLength(2);expect(document.querySelector('.mz-sheet-key .mz-solution')!.getAttribute('points')!.split(' ')).toHaveLength(maze.solution.length);
   await user.click(screen.getByRole('button',{name:'Print worksheet'}));expect(print).toHaveBeenCalledOnce();
  });
 });

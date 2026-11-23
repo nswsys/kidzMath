@@ -1,0 +1,60 @@
+/* Maze setup: theme buttons show hero → goal */
+.ws-themes.mz-themes button>span[aria-hidden]{font-size:21px;display:flex;align-items:center;gap:3px}
+.ws-themes.mz-themes button i{font-style:normal;font-size:12px;color:#a593c2}
+
+/* The drawing */
+.mz-art{display:block;width:100%;height:auto;overflow:visible}
+.mz-floor{fill:#fffefa}
+.mz-wall{stroke:var(--mz-wall);stroke-width:.13;stroke-linecap:round}
+.mz-spot.start{fill:#e9e3f7}
+.mz-spot.goal{fill:#fff0b8}
+.mz-trail{fill:none;stroke:var(--mz-trail);stroke-width:.34;stroke-linecap:round;stroke-linejoin:round;opacity:.75}
+.mz-hint{fill:none;stroke:#f2b632;stroke-width:.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:.02 .34;animation:mz-march 1s linear infinite}
+.mz-solution{fill:none;stroke:#e2574c;stroke-width:.2;stroke-linecap:round;stroke-linejoin:round}
+@keyframes mz-march{to{stroke-dashoffset:-.72}}
+.mz-emoji{font-size:.62px;text-anchor:middle;dominant-baseline:central;user-select:none;-webkit-user-select:none;pointer-events:none}
+.mz-hero{transition:x .09s linear,y .09s linear}
+.mz-hero.home{opacity:0}
+
+/* Maze game */
+.mz-game{max-width:980px}
+.mz-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:22px;align-items:start;margin-top:16px}
+.mz-board{width:100%;max-width:min(100%,max(calc(100dvh - 230px),320px));margin:0 auto;background:#fffefa;border:3px solid #a8b6d4;border-radius:22px;box-shadow:0 7px 0 #9eb1cc66;padding:8px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.mz-side{display:flex;flex-direction:column;gap:14px;background:#fffefa;border:3px solid #b5bdd9;border-radius:22px;box-shadow:0 6px 0 #9eb1cc66;padding:16px}
+.mz-side .ws-words-head .eyebrow{line-height:1.5}
+.mz-pad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,52px);gap:6px;justify-content:center}
+.mz-pad button{display:flex;align-items:center;justify-content:center;border-radius:15px;background:#f0e8ff;border:2px solid #c8b7df;box-shadow:0 3px 0 #d4c4e4;color:#5c457b}
+.mz-pad .mz-up{grid-area:1/2}.mz-pad .mz-left{grid-area:2/1}.mz-pad .mz-right{grid-area:2/3}.mz-pad .mz-down{grid-area:3/2}
+.mz-tools{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.mz-side .primary.full{width:100%;background:#ffda54;color:#674721}
+
+@media(max-width:850px){
+ .mz-layout{grid-template-columns:1fr;gap:10px;margin-top:10px}
+ .mz-board{max-width:min(100%,max(calc(100dvh - 420px),280px));padding:5px;border-radius:18px}
+ .mz-side{padding:10px 12px;gap:8px;border-radius:18px;display:grid;grid-template-columns:auto 1fr;align-items:center}
+ .mz-side .ws-words-head{display:none}
+ .mz-pad{grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,44px);gap:5px}
+ .mz-tools{flex-direction:column;align-items:stretch}
+ .mz-side .ws-status{grid-column:1/-1;min-height:30px}
+ .mz-side .primary.full{grid-column:1/-1}
+ .mz-done .mz-side{display:flex}
+}
+@media(min-width:601px) and (orientation:landscape) and (max-height:720px){
+ .mz-layout{grid-template-columns:minmax(0,1fr) 250px;gap:14px;margin-top:8px}
+ .mz-board{max-width:min(100%,max(calc(100dvh - 150px),300px))}
+ .mz-side{display:flex}
+ .mz-pad{grid-template-rows:repeat(3,44px)}
+}
+@media(prefers-reduced-motion:reduce){.mz-hint{animation:none}.mz-hero{transition:none}}
+
+/* Printable maze */
+.mz-sheet-art{width:100%;max-width:560px;margin:0 auto 28px;--mz-print:1}
+.mz-sheet .mz-wall{stroke:#2a2438}
+.mz-sheet .mz-floor{fill:white}
+.mz-sheet-key h2{text-align:center;margin-bottom:20px}
+@media print{
+ .mz-game{display:none}
+ .mz-sheet .name-line{padding:6mm 0}
+ .mz-sheet-art{max-width:165mm;margin-bottom:8mm;break-inside:avoid}
+ .mz-sheet .mz-wall{stroke:black}
+}

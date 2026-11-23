@@ -1,6 +1,6 @@
 # kidzMath
 
-A gentle, playful activity app for ages 6–10, with original SVG buddies Milo the puppy and Luna the bunny. It started as a math adventure and now also offers themed word searches and number box puzzles; the home screen lets children switch between activities. All student-facing content is English.
+A gentle, playful activity app for ages 6–10, with original SVG buddies Milo the puppy and Luna the bunny. It started as a math adventure and now also offers themed word searches, number box puzzles, and mazes; the home screen lets children switch between activities. All student-facing content is English.
 
 ## Local development
 
@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open the development URL at `/kidzMath/`. Run `npm test` for arithmetic, word search and number box generation, validation, scoring, and persistence tests. Run `npm run build` for the TypeScript check and production build; `npm run preview` serves the built app at `/kidzMath/`.
+Open the development URL at `/kidzMath/`. Run `npm test` for arithmetic, word search, number box, and maze generation, validation, scoring, and persistence tests. Run `npm run build` for the TypeScript check and production build; `npm run preview` serves the built app at `/kidzMath/`.
 
 ## Playground experience
 
@@ -47,9 +47,17 @@ Puzzles are generated on the device (`src/numberbox.ts`) and are only used when 
 
 Stars follow the same rules as the other activities, counting squares filled without a hint as first-attempt answers. Results are saved with `activity: 'numberbox'`, appear in the dashboard, and unlock the Puzzle pro badge.
 
+## Mazes
+
+Choose **Mazes** on the home screen, then a mission and a level. Each mission pairs a character with a finish: Busy bee, Space trip, Hungry puppy, Bunny snack, Summer island, Jungle swing, Way home, and Cheese chase. Missions live in `src/maze.ts`; add one by adding an entry to `mazeThemes`. Easy is a 6×6 maze, Medium 9×9, and Challenge 12×12.
+
+Mazes are generated on the device. Every maze has exactly one route between any two squares and no loops, the character starts in the top-left corner, and the finish is placed at the square farthest from the start. Move by dragging along the path, with the on-screen arrow buttons, or with the arrow keys. The trail is drawn behind the character and stepping back along it rubs it out. **Hint** makes the next four steps glow; **Start over** returns to the start.
+
+A maze has no wrong answers, so stars depend on hints: no hints earns 3 stars, one or two hints earn 2, and more earn 1. Results are saved with `activity: 'maze'`, appear in the dashboard, and unlock the Pathfinder badge.
+
 ## Worksheets
 
-Choose **Math**, **Word search**, or **Number boxes**, pick your options, select **Generate fresh**, and print. A word search worksheet has the letter grid, a tick-off word list, and a line saying which directions words can go; its answer key repeats the grid with the hidden words shaded. A number box worksheet has four fresh boxes; its answer key shows them filled in with the answers shaded. The optional answer key starts on a new printed page. Printing works through the system print dialog, including Save as PDF where available. No names are entered or stored by the app; the printed name line is for pencil use.
+Choose **Math**, **Word search**, **Number boxes**, or **Mazes**, pick your options, select **Generate fresh**, and print. A word search worksheet has the letter grid, a tick-off word list, and a line saying which directions words can go; its answer key repeats the grid with the hidden words shaded. A number box worksheet has four fresh boxes; its answer key shows them filled in with the answers shaded. A maze worksheet has one large maze; its answer key draws the way through. The optional answer key starts on a new printed page. Printing works through the system print dialog, including Save as PDF where available. No names are entered or stored by the app; the printed name line is for pencil use.
 
 ## PWA and offline use
 

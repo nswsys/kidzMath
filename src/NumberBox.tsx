@@ -1,4 +1,4 @@
-import {useEffect,useRef,useState,type KeyboardEvent,type ReactNode} from 'react';
+import {useEffect,useRef,useState,type ReactNode} from 'react';
 import {ArrowLeft,ArrowRight,Check,Delete,Lightbulb,Puzzle} from 'lucide-react';
 import type {Difficulty} from './math';
 import {Mascot} from './Mascot';
@@ -61,8 +61,9 @@ export function NumberBoxGame({box,play,onLeave,onFinish}:{box:Box;play:(cue:Cue
   play('tap');const digit=box.solution[target],next=values.map((v,i)=>i===target?digit:v===digit?null:v);
   setValues(next);setHinted(h=>[...h,target]);setSelected(nextEmpty(next,target));setMessage(all.every(l=>lineValue(l,next)===l.target)?'Every row and column matches. You solved it!':`A ${digit} belongs in that glowing square.`);
  }
- function keys(e:KeyboardEvent){if(e.ctrlKey||e.metaKey||e.altKey)return;if(/^[1-9]$/.test(e.key)){e.preventDefault();put(Number(e.key))}else if(e.key==='Backspace'||e.key==='Delete'){e.preventDefault();erase()}}
- return <section className={`game-shell nb-game ${done?'nb-done':''}`} onKeyDown={keys}>
+ // Number keys are heard on the window so they keep working when the focused square is locked by a hint.
+ useEffect(()=>{const keys=(e:globalThis.KeyboardEvent)=>{if(e.ctrlKey||e.metaKey||e.altKey||document.querySelector('dialog[open]'))return;if(/^[1-9]$/.test(e.key)){e.preventDefault();put(Number(e.key))}else if(e.key==='Backspace'||e.key==='Delete'){e.preventDefault();erase()}};window.addEventListener('keydown',keys);return()=>window.removeEventListener('keydown',keys)});
+ return <section className={`game-shell nb-game ${done?'nb-done':''}`}>
   <div className="game-top"><button className="text-link" onClick={onLeave}><ArrowLeft size={18}/> Leave game</button><span className="game-context"><strong>🧩 Number box</strong><small>{box.difficulty} · {operationName(box.operation)}</small></span><span className="streak"><Puzzle size={17}/>{filled} of {blanks.length}</span></div>
   <div className="progress-track" role="progressbar" aria-label="Squares filled" aria-valuenow={filled} aria-valuemin={0} aria-valuemax={blanks.length}><div style={{width:`${filled/blanks.length*100}%`}}/></div>
   <div className="nb-layout">
