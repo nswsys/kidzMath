@@ -19,6 +19,12 @@ The approved Playground design adds a skippable animated welcome, waving/blinkin
 
 The production app keeps its existing installation URL, progress key/schema, scoring, quiz options, and worksheets. Correct answers show a +10-point reaction; end-of-game stars still follow the scoring rules below. No demo progress or prototype controls are included.
 
+## Milo and Luna in every activity
+
+Every game outside the original math quiz has a buddy with a speech bubble that gives the instructions and reacts: a happy hop for a success and a gentle wince for a miss. Milo the puppy helps with the number activities (number boxes, number patterns, color by number) and Luna the bunny with the word activities (word search, word scramble, crossword). Hints are asked from the buddy (**Ask Milo** / **Ask Luna**). In the mazes Milo guides, except in his own maze, where he walks the path himself and Luna guides; Luna likewise walks hers. The buddy also gives the instructions on every printed worksheet, and color by number includes pictures of both buddies.
+
+Stars unlock things for the buddies to wear: party hat (3 stars), bow tie (8), sunglasses (15), flower (25), hero cape (40), and crown (60). Nothing is spent; items unlock as the star total grows and are announced on the result screen. Dress each buddy from **My progress → Dress up your buddies**; items that share a spot (the hat, flower, and crown all go on the head) replace each other. Outfits appear wherever the buddies do, are saved on this device under `kidzmath.outfit.v1`, and are put away if progress is reset below an item's stars.
+
 ## Learning adventures
 
 Choose addition, subtraction, or mixed practice; Easy (0–20), Medium (0–100), or Challenge (0–1000); and 5, 10, 15, or 20 questions. Choose numbers, picture counting, or short English story problems. Addition totals stay inside the selected range, and subtraction never goes negative. Picture counting uses up to 20 objects at every level to remain useful and readable.
@@ -49,7 +55,7 @@ Stars follow the same rules as the other activities, counting squares filled wit
 
 ## Mazes
 
-Choose **Mazes** on the home screen, then a mission and a level. Each mission pairs a character with a finish: Busy bee, Space trip, Hungry puppy, Bunny snack, Summer island, Jungle swing, Way home, and Cheese chase. Missions live in `src/maze.ts`; add one by adding an entry to `mazeThemes`. Easy is a 6×6 maze, Medium 9×9, and Challenge 12×12.
+Choose **Mazes** on the home screen, then a mission and a level. Each mission pairs a character with a finish: Busy bee, Space trip, Milo’s treat, Luna’s snack, Summer island, Jungle swing, Way home, and Cheese chase. Missions live in `src/maze.ts`; add one by adding an entry to `mazeThemes`. Easy is a 6×6 maze, Medium 9×9, and Challenge 12×12.
 
 Mazes are generated on the device. Every maze has exactly one route between any two squares and no loops, the character starts in the top-left corner, and the finish is placed at the square farthest from the start. Move by dragging along the path, with the on-screen arrow buttons, or with the arrow keys. The trail is drawn behind the character and stepping back along it rubs it out. **Hint** makes the next four steps glow; **Start over** returns to the start.
 
@@ -65,7 +71,7 @@ These four activities share one registry (`src/activities.tsx`): each entry supp
 
 **Crossword** builds a small crossword from a bank of 20 clued words per theme (Animals, Yummy foods, Sky & nature) in `src/crossword.ts`: 4 words on Easy, 6 on Medium, 8 on Challenge. Every word crosses another and no stray words are formed. Tap a square or a clue, then use the on-screen letters or a keyboard; a finished word turns green and locks. **Hint** reveals one letter.
 
-**Color by number** hides a pixel picture (heart, fish, rocket, flower, house, tree, or sunny face). Each color has its own answer. Easy squares show the number itself, Medium squares show additions up to 10, and Challenge squares show additions and subtractions within 20. Pick a color, then tap or drag across the squares with that answer. Tapping a square with the wrong color counts as a mistake; dragging over other squares does not. Stars use the share of squares painted without a mistake.
+**Color by number** hides a pixel picture (Milo, Luna, heart, fish, rocket, flower, house, tree, or sunny face). Each color has its own answer. Easy squares show the number itself, Medium squares show additions up to 10, and Challenge squares show additions and subtractions within 20. Pick a color, then tap or drag across the squares with that answer. Tapping a square with the wrong color counts as a mistake; dragging over other squares does not. Stars use the share of squares painted without a mistake.
 
 ## Worksheets
 

@@ -11,8 +11,8 @@ export const directions:Direction[]=['up','right','down','left'];
 export const mazeThemes:MazeTheme[]=[
  {id:'garden',name:'Busy bee',hero:'🐝',goal:'🌸',mission:'Help the bee find the flower',wall:'#4f8a4b',trail:'#f2b632'},
  {id:'space',name:'Space trip',hero:'🚀',goal:'🪐',mission:'Fly the rocket to the planet',wall:'#4b4a8f',trail:'#8f7df0'},
- {id:'puppy',name:'Hungry puppy',hero:'🐶',goal:'🦴',mission:'Lead the puppy to the bone',wall:'#8a5a34',trail:'#e39a52'},
- {id:'bunny',name:'Bunny snack',hero:'🐰',goal:'🥕',mission:'Hop the bunny to the carrot',wall:'#7a5aa8',trail:'#f08a4b'},
+ {id:'puppy',name:'Milo’s treat',hero:'🐶',goal:'🦴',mission:'Lead Milo to the bone',wall:'#8a5a34',trail:'#e39a52'},
+ {id:'bunny',name:'Luna’s snack',hero:'🐰',goal:'🥕',mission:'Hop Luna to the carrot',wall:'#7a5aa8',trail:'#f08a4b'},
  {id:'island',name:'Summer island',hero:'⛵',goal:'🏝️',mission:'Sail the boat to the island',wall:'#2f7f9c',trail:'#34b3c9'},
  {id:'jungle',name:'Jungle swing',hero:'🐵',goal:'🍌',mission:'Swing the monkey to the banana',wall:'#3f7a55',trail:'#d9a520'},
  {id:'home',name:'Way home',hero:'🚗',goal:'🏠',mission:'Drive the car back home',wall:'#5c6478',trail:'#e2574c'},

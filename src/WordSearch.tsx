@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState,type KeyboardEvent,type PointerEvent} from 'react';
-import {ArrowLeft,ArrowRight,Check,Lightbulb,Search} from 'lucide-react';
+import {ArrowLeft,ArrowRight,Check,Search} from 'lucide-react';
 import type {Difficulty} from './math';
-import {Mascot} from './Mascot';
+import {AskBuddy,Buddy,PaperBuddy,useSay} from './GameShell';
 import type {Cue} from './sounds';
 import {directionHelp,levels,lineBetween,matchWord,snapLine,themeOf,themes,type Cell,type Puzzle,type WordSettings} from './wordsearch';
 const colors=['#ffd166','#a8e6cf','#c9b6ff','#ffb3c7','#9ad7ff','#ffc09f','#d4f08a','#f7b2ff','#8fe3e0','#ffe08a'];
@@ -18,7 +18,8 @@ export function WordSearchSetup({settings,onChange,onStart}:{settings:WordSettin
 }
 
 export function WordSearchGame({puzzle,play,onLeave,onFinish}:{puzzle:Puzzle;play:(cue:Cue)=>void;onLeave:()=>void;onFinish:(outcome:{total:number;solo:number})=>void}){
- const [found,setFound]=useState<{word:string;cells:Cell[]}[]>([]),[hinted,setHinted]=useState<string[]>([]),[hintCell,setHintCell]=useState<Cell|null>(null),[anchor,setAnchor]=useState<Cell|null>(null),[preview,setPreview]=useState<Cell[]>([]),[cursor,setCursor]=useState<Cell>({r:0,c:0}),[message,setMessage]=useState('');
+ const [found,setFound]=useState<{word:string;cells:Cell[]}[]>([]),[hinted,setHinted]=useState<string[]>([]),[hintCell,setHintCell]=useState<Cell|null>(null),[anchor,setAnchor]=useState<Cell|null>(null),[preview,setPreview]=useState<Cell[]>([]),[cursor,setCursor]=useState<Cell>({r:0,c:0});
+ const [note,setMessage]=useSay(),message=note.text;
  const drag=useRef<{start:Cell;moved:boolean;cells:Cell[]}|null>(null),skipClick=useRef(false),gridRef=useRef<HTMLDivElement>(null),headingRef=useRef<HTMLHeadingElement>(null);
  const total=puzzle.placements.length,foundWords=found.map(f=>f.word),done=found.length===total,theme=themeOf(puzzle.theme);
  const tint=new Map<string,string>();found.forEach((f,i)=>f.cells.forEach(p=>{if(!tint.has(keyOf(p)))tint.set(keyOf(p),colors[i%colors.length])}));
@@ -26,16 +27,16 @@ export function WordSearchGame({puzzle,play,onLeave,onFinish}:{puzzle:Puzzle;pla
  useEffect(()=>{headingRef.current?.focus({preventScroll:true})},[]);
  function check(cells:Cell[]){
   const word=cells.length>1?matchWord(puzzle,cells,foundWords):null;
-  if(!word){play('tap');setMessage('Not one of our words yet. Keep hunting!');return}
+  if(!word){play('tap');setMessage('Not one of our words yet. Keep hunting!','oops');return}
   const next=[...found,{word,cells}];setFound(next);if(same(hintCell,cells[0])||same(hintCell,cells[cells.length-1]))setHintCell(null);
-  play('correct');setMessage(next.length===total?`You found ${word}. That’s every word!`:`You found ${word}! ${total-next.length} to go.`);
+  play('correct');setMessage(next.length===total?`You found ${word}. That’s every word!`:`You found ${word}! ${total-next.length} to go.`,'happy');
  }
  function tap(cell:Cell){
   if(done)return;
   if(!anchor){play('tap');setAnchor(cell);setMessage('Now tap the last letter of the word.');return}
   if(same(anchor,cell)){setAnchor(null);setMessage('');return}
   const line=lineBetween(anchor,cell);
-  if(!line){play('tap');setAnchor(cell);setMessage('Words go in a straight line. Start again from this letter.');return}
+  if(!line){play('tap');setAnchor(cell);setMessage('Words go in a straight line. Start again from this letter.','oops');return}
   setAnchor(null);check(line);
  }
  function cellAt(e:{clientX:number;clientY:number}):Cell|null{const el=document.elementFromPoint?.(e.clientX,e.clientY)?.closest<HTMLElement>('[data-r]');return el?{r:Number(el.dataset.r),c:Number(el.dataset.c)}:null}
@@ -55,9 +56,9 @@ export function WordSearchGame({puzzle,play,onLeave,onFinish}:{puzzle:Puzzle;pla
     </div>
    </div>
    <aside className="ws-side">
-    <div className="ws-words-head"><span className="eyebrow green">WORDS TO FIND</span>{!done&&<button className="hint-button" onClick={hint}><Lightbulb size={18}/><span>Hint</span></button>}</div>
+    <div className="ws-words-head"><span className="eyebrow green">WORDS TO FIND</span>{!done&&<AskBuddy animal="bunny" onClick={hint}/>}</div>
     <ul className="ws-words" aria-label="Words to find">{puzzle.placements.map(p=>{const i=foundWords.indexOf(p.word);return <li key={p.word} className={i>=0?'found':''} style={i>=0?{background:colors[i%colors.length]}:undefined}>{p.word}{i>=0&&<><Check size={14} aria-hidden="true"/><span className="sr-only"> found</span></>}</li>})}</ul>
-    <div className="ws-status" role="status">{done?<div className="ws-cheer"><span className="cheer-buddy" aria-hidden="true"><Mascot happy/></span><div><strong className="cheer-title">Word wizard!</strong><span>{message}</span></div></div>:<span>{message||'Drag across a word, or tap its first and last letter.'}</span>}</div>
+    <div className="ws-status" role="status"><Buddy animal="bunny" mood={done?'happy':note.mood} title={done?'Word wizard!':undefined} text={message||'Drag across a word, or tap its first and last letter.'}/></div>
     {done&&<button className="primary full" onClick={()=>onFinish({total,solo:puzzle.placements.filter(p=>!hinted.includes(p.word)).length})}>See my stars <ArrowRight size={19}/></button>}
    </aside>
   </div>
@@ -71,7 +72,7 @@ function SheetGrid({puzzle,answers=false}:{puzzle:Puzzle;answers?:boolean}){
 }
 export function WordSearchSheet({puzzle,answerKey}:{puzzle:Puzzle;answerKey:boolean}){
  const theme=themeOf(puzzle.theme);
- return <article className="worksheet-paper ws-sheet"><div className="print-brand">kidzMath<span>Little steps. Big discoveries.</span></div><h2>My word search: {theme.name} <span aria-hidden="true">{theme.icon}</span></h2><p>Find and circle the {puzzle.placements.length} hidden words. {directionHelp[puzzle.difficulty]}</p><div className="name-line"><span>Name: ___________________</span><span>Date: ______________</span></div>
+ return <article className="worksheet-paper ws-sheet"><div className="print-brand">kidzMath<span>Little steps. Big discoveries.</span></div><h2>My word search: {theme.name} <span aria-hidden="true">{theme.icon}</span></h2><PaperBuddy animal="bunny">Find and circle the {puzzle.placements.length} hidden words. {directionHelp[puzzle.difficulty]}</PaperBuddy><div className="name-line"><span>Name: ___________________</span><span>Date: ______________</span></div>
   <SheetGrid puzzle={puzzle}/>
   <ul className="ws-sheet-words" aria-label="Words to find">{puzzle.placements.map(p=><li key={p.word}><span className="ws-sheet-box" aria-hidden="true"/>{p.word}</li>)}</ul>
   <p className="paper-footer">Every word you find helps your brain grow. — Milo & Luna ♡</p>

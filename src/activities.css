@@ -148,3 +148,43 @@
  .cb-paper-board{max-width:150mm;margin-bottom:7mm}
  .cw-sheet .cw-clues{margin-bottom:7mm}
 }
+
+/* The game buddy: Milo or Luna with a speech bubble */
+.ws-status .buddy{display:flex;align-items:flex-end;justify-content:center;gap:8px;text-align:left;width:100%}
+.buddy-art{flex:0 0 50px;width:50px;height:58px;display:block}
+.buddy-art svg{width:100%;height:100%}
+.buddy-bubble{background:#f3eef9;border:2px solid #d9cdea;border-radius:16px 16px 16px 4px;padding:8px 12px;font-size:13px;line-height:1.4;color:#5c457b;min-width:0;max-width:360px;transition:background .15s,border-color .15s}
+.buddy-bubble>span{display:block}
+.buddy .cheer-title{display:block;color:#7860df;font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;line-height:1.2}
+.buddy.happy .buddy-bubble{background:#e3f7ea;border-color:#9ad6b0;color:#1f6b45}
+.buddy.oops .buddy-bubble{background:#fff0e6;border-color:#f0bd9c;color:#8a4a26}
+.buddy.happy .buddy-art{animation:buddy-hop .55s ease-in-out 2}
+.buddy.oops .buddy-art{animation:buddy-tilt .5s ease-in-out}
+@keyframes buddy-hop{50%{transform:translateY(-7px)}}
+@keyframes buddy-tilt{30%{transform:rotate(-9deg)}70%{transform:rotate(7deg)}}
+.ask-buddy span{font-weight:600}
+/* Milo and Luna walking through their own mazes */
+.boxed-mascot{overflow:visible}
+.boxed-mascot *{animation:none!important}
+/* The buddy on printed pages */
+.paper-buddy{display:flex;align-items:center;gap:10px;margin-top:2px}
+.paper-buddy-art{flex:0 0 52px;width:52px;height:61px;display:block}
+.paper-buddy-art svg{width:100%;height:100%}
+.paper-buddy-art *{animation:none!important}
+.paper-buddy p{margin:0;font-size:12px;line-height:1.45;color:var(--muted);background:#f6f2fb;border:1.5px solid #d9cdea;border-radius:14px 14px 14px 3px;padding:8px 12px}
+/* Dress-up closet on the progress page */
+.closet-note{font-size:13px;color:#7c7391;margin:-6px 0 14px}
+.closet{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:36px}
+.closet-card{display:grid;grid-template-columns:118px minmax(0,1fr);gap:4px 16px;align-items:center;background:#fffefa;border:2px solid #d9cdea;border-radius:20px;padding:16px;box-shadow:0 4px 0 #d4c4e455}
+.closet-buddy{grid-row:1/3;height:138px}
+.closet-buddy svg{width:100%;height:100%}
+.closet-card h3{font-size:19px;font-weight:600;color:#4e3b68;align-self:end}
+.closet-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-self:start}
+.closet-items button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 3px;min-height:58px;border-radius:14px;background:#f6f2fb;border:2px solid #e0d4e8;font-size:22px;line-height:1.1}
+.closet-items button small{font-size:10.5px;font-weight:600;color:#6b587c;text-align:center}
+.closet-items button.chosen{background:#fff3bb;border-color:#e0a92e;box-shadow:0 3px 0 #e8cf7a}
+.closet-items button:disabled{opacity:.6;filter:grayscale(1)}
+@media(max-width:850px){.closet{grid-template-columns:1fr}}
+@media(max-width:600px){.closet-card{grid-template-columns:88px minmax(0,1fr);padding:12px;gap:4px 10px}.closet-buddy{height:104px}.buddy-art{flex-basis:44px;width:44px;height:51px}.buddy-bubble{font-size:12.5px;padding:7px 10px}}
+@media(prefers-reduced-motion:reduce){.buddy .buddy-art{animation:none!important}}
+@media print{.paper-buddy p{color:#333;border-color:#999;background:white}}

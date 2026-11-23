@@ -13,7 +13,8 @@ import {directionTo,directions,generateMaze,step} from './maze';
 import {generateScramble} from './scramble';
 import {generatePatterns} from './patterns';
 import {generateCrossword} from './crossword';
-import {generateColoring} from './colorbynumber';
+import {generateColoring,revealText} from './colorbynumber';
+import {OUTFIT_KEY} from './outfit';
 function answer(){const t=document.querySelector('.math-question')!.textContent!;const m=t.match(/(\d+)\s*([+−])\s*(\d+)/)!;return String(m[2]==='+'?Number(m[1])+Number(m[3]):Number(m[1])-Number(m[3]));}
 beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});localStorage.clear();sessionStorage.clear();sessionStorage.setItem(WELCOME_KEY,'seen');vi.spyOn(SoundKit.prototype,'play').mockReturnValue(true);vi.spyOn(SoundKit.prototype,'stop').mockImplementation(()=>{});vi.spyOn(Math,'random').mockReturnValue(.2);HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','')};HTMLDialogElement.prototype.close=function(){this.removeAttribute('open')}});
 afterEach(()=>{cleanup();vi.restoreAllMocks()});
@@ -114,14 +115,14 @@ describe('complete learning flows',()=>{
   await user.click(cell(first.cells[0]));expect(cell(first.cells[0]).getAttribute('aria-pressed')).toBe('true');
   const crooked=puzzle.placements.flatMap(p=>p.cells).find(c=>c.r!==first.cells[0].r&&c.c!==first.cells[0].c&&Math.abs(c.r-first.cells[0].r)!==Math.abs(c.c-first.cells[0].c));
   if(crooked){await user.click(cell(crooked));expect(screen.getByRole('status').textContent).toMatch(/straight line/);await user.click(cell(crooked))}else await user.click(cell(first.cells[0]));
-  await user.click(screen.getByRole('button',{name:'Hint'}));expect(screen.getByRole('status').textContent).toContain(`${first.word} starts at the glowing letter`);expect(cell(first.cells[0]).className).toContain('hint-glow');
+  await user.click(screen.getByRole('button',{name:'Ask Luna'}));expect(screen.getByRole('status').textContent).toContain(`${first.word} starts at the glowing letter`);expect(cell(first.cells[0]).className).toContain('hint-glow');
   await user.click(cell(first.cells[0]));await user.click(cell(first.cells[first.cells.length-1]));
   expect(screen.getByRole('status').textContent).toContain(`You found ${first.word}`);expect(screen.getByText('1 of 6')).toBeTruthy();expect(cell(first.cells[0]).className).toContain('found');expect(SoundKit.prototype.play).toHaveBeenCalledWith('correct');
   expect(screen.queryByRole('button',{name:'See my stars'})).toBe(null);
   await user.click(screen.getByRole('button',{name:'My progress'}));const dialog=screen.getByRole('dialog');await user.click(within(dialog).getByRole('button',{name:'Keep playing'}));
   // Backwards selections count too.
   for(const p of rest){await user.click(cell(p.cells[p.cells.length-1]));await user.click(cell(p.cells[0]))}
-  expect(screen.getByText('6 of 6')).toBeTruthy();expect(screen.queryByRole('button',{name:'Hint'})).toBe(null);await user.click(screen.getByRole('button',{name:'See my stars'}));
+  expect(screen.getByText('6 of 6')).toBeTruthy();expect(screen.queryByRole('button',{name:'Ask Luna'})).toBe(null);await user.click(screen.getByRole('button',{name:'See my stars'}));
   expect(screen.getByText('YOU DID IT!')).toBeTruthy();expect(screen.getByText('words found')).toBeTruthy();expect(screen.getByText('hint used')).toBeTruthy();expect(screen.getByText(/New badge: Word detective/)).toBeTruthy();
   const saved=loadProgress(localStorage).results[0];expect(saved).toMatchObject({activity:'wordsearch',correct:5,total:6,stars:2,points:50,settings:{theme:'space',difficulty:'Easy',count:6}});
   await user.click(screen.getByRole('button',{name:'Play again'}));expect(screen.getByText('0 of 6')).toBeTruthy();
@@ -157,7 +158,7 @@ describe('complete learning flows',()=>{
   // Put the first answer in the wrong square, then move it by placing it again.
   await user.click(cell(second));await user.click(pad(box.solution[first]));expect(cell(second).textContent).toBe(String(box.solution[first]));
   await user.click(cell(first));await user.click(pad(box.solution[first]));expect(cell(first).textContent).toBe(String(box.solution[first]));expect(cell(second).textContent).toBe('');
-  await user.click(cell(second));await user.click(screen.getByRole('button',{name:'Hint'}));expect(cell(second).textContent).toBe(String(box.solution[second]));expect(cell(second).disabled).toBe(true);expect(screen.getByRole('status').textContent).toMatch(/belongs in that glowing square|solved/);
+  await user.click(cell(second));await user.click(screen.getByRole('button',{name:'Ask Milo'}));expect(cell(second).textContent).toBe(String(box.solution[second]));expect(cell(second).disabled).toBe(true);expect(screen.getByRole('status').textContent).toMatch(/belongs in that glowing square|solved/);
   expect(screen.queryByRole('button',{name:'See my stars'})).toBe(null);
   // Physical keys work too.
   for(const i of rest){await user.click(cell(i));await user.keyboard(String(box.solution[i]))}
@@ -188,7 +189,7 @@ describe('complete learning flows',()=>{
   await user.click(screen.getByRole('button',{name:`Move ${go(0)}`}));await user.click(screen.getByRole('button',{name:`Move ${go(1)}`}));expect(screen.getByText(`${total-2} to go`)).toBeTruthy();expect(document.querySelector('.mz-trail')!.getAttribute('points')!.split(' ')).toHaveLength(3);
   // Stepping back along the trail rubs it out.
   await user.click(screen.getByRole('button',{name:`Move ${directionTo(maze,route[2],route[1])}`}));expect(screen.getByText(`${total-1} to go`)).toBeTruthy();expect(document.querySelector('.mz-trail')!.getAttribute('points')!.split(' ')).toHaveLength(2);
-  await user.click(screen.getByRole('button',{name:'Hint'}));expect(screen.getByRole('status').textContent).toContain(`Start by going ${go(1)}`);expect(document.querySelector('.mz-hint')).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:'Ask Milo'}));expect(screen.getByRole('status').textContent).toContain(`Start by going ${go(1)}`);expect(document.querySelector('.mz-hint')).toBeTruthy();
   await user.click(screen.getByRole('button',{name:'Start over'}));expect(screen.getByText(`${total} to go`)).toBeTruthy();expect(document.querySelector('.mz-hint')).toBe(null);
   const keyFor={up:'{ArrowUp}',right:'{ArrowRight}',down:'{ArrowDown}',left:'{ArrowLeft}'};
   for(let i=0;i<total;i++){expect(screen.queryByRole('button',{name:'See my stars'})).toBe(null);await user.keyboard(keyFor[go(i)])}
@@ -214,7 +215,7 @@ describe('complete learning flows',()=>{
   // Tapping the tiles in their mixed-up order spells something that is not a word.
   for(let i=0;i<first.letters.length;i++)await user.click(tile(i));expect(screen.getByRole('status').textContent).toMatch(/Not a word yet/);expect(document.querySelector('.sc-slots')!.className).toContain('off');
   await user.click(slot(first.letters.length-1));expect(slot(first.letters.length-1).textContent).toBe('');await user.click(screen.getByRole('button',{name:'Clear'}));expect(slot(0).textContent).toBe('');
-  await user.click(screen.getByRole('button',{name:'Hint'}));expect(slot(0).textContent).toBe(first.word[0]);expect(slot(0).disabled).toBe(true);expect(screen.getByRole('status').textContent).toContain(`Letter 1 is ${first.word[0]}`);
+  await user.click(screen.getByRole('button',{name:'Ask Luna'}));expect(slot(0).textContent).toBe(first.word[0]);expect(slot(0).disabled).toBe(true);expect(screen.getByRole('status').textContent).toContain(`Letter 1 is ${first.word[0]}`);
   await user.keyboard(first.word.slice(1));expect(screen.getByRole('status').textContent).toContain(`${first.word}! You unscrambled it.`);expect(SoundKit.prototype.play).toHaveBeenCalledWith('correct');
   await user.click(screen.getByRole('button',{name:'Next word'}));
   for(let i=1;i<total;i++){expect(screen.getByText(`${i} of ${total}`)).toBeTruthy();await user.keyboard(puzzle.words[i].word);await user.keyboard('{Enter}')}
@@ -232,7 +233,7 @@ describe('complete learning flows',()=>{
   await user.click(choice(wrong));expect(screen.getByRole('status').textContent).toMatch(/Not that one/);expect(choice(wrong).disabled).toBe(true);
   await user.click(choice(first.answer));expect(screen.getByRole('status').textContent).toContain(`${first.answer} is right!`);expect(document.querySelector('.pt-row li.blank')!.textContent).toBe(String(first.answer));await user.click(screen.getByRole('button',{name:'Next pattern'}));
   // A hint shows the rule and also costs the first-try point.
-  await user.click(screen.getByRole('button',{name:'Hint'}));expect(screen.getByText(puzzle.patterns[1].rule)).toBeTruthy();await user.click(choice(puzzle.patterns[1].answer));await user.keyboard('{Enter}');
+  await user.click(screen.getByRole('button',{name:'Ask Milo'}));expect(screen.getByText(puzzle.patterns[1].rule)).toBeTruthy();await user.click(choice(puzzle.patterns[1].answer));await user.keyboard('{Enter}');
   for(let i=2;i<total;i++){expect(screen.getByText(`${i} of ${total}`)).toBeTruthy();await user.click(choice(puzzle.patterns[i].answer));await user.click(screen.getByRole('button',{name:i+1===total?'See my stars':'Next pattern'}))}
   expect(screen.getByText('right on the first try')).toBeTruthy();expect(screen.getByText(/New badge: Pattern spotter/)).toBeTruthy();
   expect(loadProgress(localStorage).results[0]).toMatchObject({activity:'patterns',correct:total-2,total,stars:2,settings:{difficulty:'Medium',count:total}});expect(loadProgress(localStorage).results[0].settings).not.toHaveProperty('theme');
@@ -245,7 +246,7 @@ describe('complete learning flows',()=>{
   expect(document.querySelectorAll('.cw-cell')).toHaveLength(cw.letters.filter(Boolean).length);expect(screen.getByText(`0 of ${total}`)).toBeTruthy();
   const filled=new Set<number>();
   // First word: one hinted letter, one wrong letter fixed with erase, the rest from the on-screen keyboard.
-  const first=cw.entries[0];await user.click(clue(0));await user.click(screen.getByRole('button',{name:'Hint'}));expect(cell(first.cells[0]).textContent).toContain(first.word[0]);expect(cell(first.cells[0]).className).toContain('hinted');
+  const first=cw.entries[0];await user.click(clue(0));await user.click(screen.getByRole('button',{name:'Ask Luna'}));expect(cell(first.cells[0]).textContent).toContain(first.word[0]);expect(cell(first.cells[0]).className).toContain('hinted');
   const helped=cw.entries.filter(e=>e.cells.includes(first.cells[0])).length;
   const keys=within(screen.getByRole('group',{name:'Letter keyboard'})),wrongLetter=first.word[1]==='Q'?'Z':'Q';
   await user.click(keys.getByRole('button',{name:wrongLetter}));expect(cell(first.cells[1]).textContent).toContain(wrongLetter);await user.click(keys.getByRole('button',{name:'Erase letter'}));await user.click(keys.getByRole('button',{name:'Erase letter'}));expect(cell(first.cells[1]).textContent).not.toContain(wrongLetter);
@@ -285,7 +286,54 @@ describe('complete learning flows',()=>{
   expect(document.querySelectorAll('.cw-sheet .cw-paper:not(.answers) .cw-cell')).toHaveLength(cw.letters.filter(Boolean).length);expect([...document.querySelectorAll('.cw-sheet .cw-paper:not(.answers) .cw-cell')].every(c=>!/[A-Z]/.test(c.textContent!))).toBe(true);
   expect([...document.querySelectorAll('.cw-sheet-key .cw-cell')].map(c=>c.textContent!.replace(/\d/g,'')).join('')).toBe(cw.letters.filter(Boolean).join(''));
   await user.click(screen.getByRole('button',{name:/Color by number/}));const art=generateColoring({difficulty:'Easy'});
-  expect(screen.getByText(/My color by number/)).toBeTruthy();expect(document.querySelectorAll('.cb-key li')).toHaveLength(art.colors.length);expect(document.querySelectorAll('.cb-sheet .cb-paper:not(.answers) .cb-cell')).toHaveLength(art.cells.filter(Boolean).length);expect(screen.getByText(new RegExp(`Answer key · It’s an? ${art.name}!`))).toBeTruthy();
+  expect(screen.getByText(/My color by number/)).toBeTruthy();expect(document.querySelectorAll('.cb-key li')).toHaveLength(art.colors.length);expect(document.querySelectorAll('.cb-sheet .cb-paper:not(.answers) .cb-cell')).toHaveLength(art.cells.filter(Boolean).length);expect(screen.getByText(`Answer key · ${revealText(art)}`)).toBeTruthy();expect(document.querySelectorAll('.paper-buddy .mascot')).toHaveLength(1);
   await user.click(screen.getByRole('button',{name:'Print worksheet'}));expect(print).toHaveBeenCalledOnce();
+ });
+ it('gives every game a buddy who reacts, with Luna on words and Milo on numbers',async()=>{
+  const user=userEvent.setup();render(<App/>);
+  await user.click(screen.getByRole('button',{name:/Word search/}));await user.click(screen.getByRole('button',{name:'Find the words!'}));
+  const status=()=>screen.getByRole('status'),buddy=()=>status().querySelector('.buddy')!;
+  expect(buddy().className).toContain('idle');expect(within(status()).getByRole('img',{hidden:true}).getAttribute('aria-label')).toMatch(/Luna/);expect(screen.getByRole('button',{name:'Ask Luna'})).toBeTruthy();
+  const puzzle=generatePuzzle({theme:'animals',difficulty:'Easy'}),cell=(p:{r:number;c:number})=>document.querySelector<HTMLElement>(`.ws-cell[data-r="${p.r}"][data-c="${p.c}"]`)!,word=puzzle.placements[0];
+  // Two letters that are not a word make the buddy wince; a found word makes them happy.
+  const stray=puzzle.placements[1].cells[0],near={r:stray.r,c:stray.c===0?1:stray.c-1};await user.click(cell(stray));await user.click(cell(near));
+  expect(buddy().className).toContain('oops');expect(status().textContent).toMatch(/Keep hunting/);
+  await user.click(cell(word.cells[0]));await user.click(cell(word.cells[word.cells.length-1]));expect(buddy().className).toContain('happy');expect(status().querySelector('.mascot.happy')).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:'Leave game'}));await user.click(screen.getByRole('button',{name:'Leave this game'}));
+  await user.click(screen.getByRole('button',{name:/Number patterns/}));await user.click(screen.getByRole('button',{name:'Spot the patterns!'}));
+  expect(within(status()).getByRole('img',{hidden:true}).getAttribute('aria-label')).toMatch(/Milo/);expect(screen.getByRole('button',{name:'Ask Milo'})).toBeTruthy();
+ });
+ it('sends Milo himself through his maze while Luna guides',async()=>{
+  const user=userEvent.setup();render(<App/>);await user.click(screen.getByRole('button',{name:/Mazes/}));await user.click(screen.getByRole('button',{name:/^Milo’s treat/}));await user.click(screen.getByRole('button',{name:'Enter the maze!'}));
+  const maze=generateMaze({theme:'puppy',difficulty:'Easy'}),hero=()=>document.querySelector('.mz-board .boxed-mascot')!;
+  expect(hero().getAttribute('aria-label')).toMatch(/Milo/);expect(document.querySelector('.mz-board .mz-hero')).toBe(null);expect(screen.getByRole('button',{name:'Ask Luna'})).toBeTruthy();
+  const before=hero().getAttribute('x')+','+hero().getAttribute('y');await user.keyboard({up:'{ArrowUp}',right:'{ArrowRight}',down:'{ArrowDown}',left:'{ArrowLeft}'}[directionTo(maze,maze.solution[0],maze.solution[1])!]);
+  expect(hero().getAttribute('x')+','+hero().getAttribute('y')).not.toBe(before);
+ });
+ it('unlocks things to wear with stars and dresses the buddies everywhere',async()=>{
+  const games=[1,2,3].map(n=>({id:`g${n}`,date:'2026-01-01T12:00:00Z',correct:5,total:5,bestStreak:5,settings:defaults,...score(5,5,5)}));
+  localStorage.setItem(KEY,JSON.stringify({version:1,results:games}));
+  const user=userEvent.setup();const view=render(<App/>);await user.click(screen.getByRole('button',{name:'My progress'}));
+  // Nine stars: the party hat (3) and bow tie (8) are open, sunglasses (15) are not.
+  const milo=within(screen.getByRole('region',{name:'Milo’s closet'})),luna=within(screen.getByRole('region',{name:'Luna’s closet'}));
+  expect((milo.getByRole('button',{name:/Sunglasses for Milo, unlocks at 15 stars/}) as HTMLButtonElement).disabled).toBe(true);expect(document.querySelector('.worn-hat')).toBe(null);
+  await user.click(milo.getByRole('button',{name:'Party hat for Milo'}));expect(milo.getByRole('button',{name:'Party hat for Milo'}).getAttribute('aria-pressed')).toBe('true');
+  expect(document.querySelector('.closet-card .worn-hat')).toBeTruthy();expect(document.querySelectorAll('.worn-hat')).toHaveLength(1);
+  await user.click(luna.getByRole('button',{name:'Bow tie for Luna'}));expect(JSON.parse(localStorage.getItem(OUTFIT_KEY)!)).toEqual({puppy:['hat'],bunny:['bow']});
+  await user.click(milo.getByRole('button',{name:'Party hat for Milo'}));expect(document.querySelector('.worn-hat')).toBe(null);await user.click(milo.getByRole('button',{name:'Party hat for Milo'}));
+  // The outfit follows the buddies into games and survives a reload.
+  view.unmount();render(<App/>);await user.click(screen.getByRole('button',{name:/Number boxes/}));await user.click(screen.getByRole('button',{name:'Solve the puzzle!'}));expect(screen.getByRole('status').querySelector('.worn-hat')).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:'Leave game'}));await user.click(screen.getByRole('button',{name:'Leave this game'}));await user.click(screen.getByRole('button',{name:/Word scramble/}));await user.click(screen.getByRole('button',{name:'Unscramble!'}));expect(screen.getByRole('status').querySelector('.worn-bow')).toBeTruthy();expect(screen.getByRole('status').querySelector('.worn-hat')).toBe(null);
+ });
+ it('announces a newly unlocked accessory and puts accessories away when progress is reset',async()=>{
+  localStorage.setItem(OUTFIT_KEY,JSON.stringify({puppy:['hat','nonsense'],bunny:['crown']}));
+  const user=userEvent.setup();render(<App/>);expect(document.querySelector('.worn-hat')).toBe(null);
+  await user.click(screen.getByRole('button',{name:/Number patterns/}));await user.click(screen.getByRole('button',{name:'Spot the patterns!'}));
+  const puzzle=generatePatterns({difficulty:'Easy'});
+  for(let i=0;i<puzzle.patterns.length;i++){await user.click(within(screen.getByRole('group',{name:'Choose the missing number'})).getByRole('button',{name:new RegExp(`^${puzzle.patterns[i].answer}(,|$)`)}));await user.keyboard('{Enter}')}
+  // Three stars reach the party hat, which was saved as worn, so Milo puts it straight on.
+  expect(screen.getByText(/New to wear: Party hat!/)).toBeTruthy();expect(document.querySelector('.result-card .worn-hat')).toBeTruthy();expect(document.querySelector('.worn-crown')).toBe(null);
+  vi.spyOn(window,'confirm').mockReturnValue(true);await user.click(screen.getByRole('button',{name:'Choose an adventure'}));await user.click(screen.getByRole('button',{name:'My progress'}));expect(document.querySelector('.worn-hat')).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:'Reset progress'}));expect(document.querySelector('.worn-hat')).toBe(null);
  });
 });

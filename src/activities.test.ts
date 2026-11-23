@@ -7,6 +7,7 @@ import {generatePattern,generatePatterns,patternLevels} from './patterns';
 import {crosswordLevels,crosswordThemes,generateCrossword} from './crossword';
 import {colorLevels,expression,generateColoring,paints,pictures,valueOf} from './colorbynumber';
 import {KEY,loadProgress,saveResult,totals,type Result} from './progress';
+import {OUTFIT_KEY,items,loadOutfits,noOutfits,saveOutfits,toggleItem,unlockedItems,visibleOutfits} from './outfit';
 function seeded(seed:number){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
 const difficulties:Difficulty[]=['Easy','Medium','Challenge'],stuck=[0,.2,.5,.999];
 describe('word scramble',()=>{
@@ -81,4 +82,18 @@ describe('progress for the newer activities',()=>{
  const game=(activity:'scramble'|'patterns'|'crossword'|'colors',id:string):Result=>({id,date:'2026-01-05',correct:4,total:5,bestStreak:0,activity,settings:{difficulty:'Easy',theme:'animals',count:5},...score(4,5)});
  it('saves and counts each one',()=>{const store=memory();for(const a of ['scramble','patterns','crossword','colors'] as const)saveResult(store,game(a,a));expect(loadProgress(store).results).toHaveLength(4);expect(totals(loadProgress(store)).by).toEqual({scramble:1,patterns:1,crossword:1,colors:1})});
  it('files older results under math and discards unknown activities or broken settings',()=>{const store=memory();store.setItem(KEY,JSON.stringify({version:1,results:[{...game('scramble','x'),activity:'chess'},{...game('patterns','y'),settings:{difficulty:'Huge',count:5}},{...game('colors','z'),settings:{difficulty:'Easy',count:'many'}},{id:'old',date:'2026-01-01',correct:4,total:5,bestStreak:3,settings:{difficulty:'Easy',operation:'Mixed',mode:'Numbers',count:5},...score(4,5,3)}]}));expect(loadProgress(store).results.map(r=>r.id)).toEqual(['old']);expect(totals(loadProgress(store)).by).toEqual({math:1})});
+});
+describe('buddy outfits',()=>{
+ const memory=()=>{const values=new Map<string,string>();return {getItem:(k:string)=>values.get(k)||null,setItem:(k:string,v:string)=>{values.set(k,v)}}};
+ it('unlocks items in order as stars grow',()=>{expect(unlockedItems(0)).toEqual([]);expect(unlockedItems(3).map(i=>i.id)).toEqual(['hat']);expect(unlockedItems(15).map(i=>i.id)).toEqual(['hat','bow','glasses']);expect(unlockedItems(999)).toHaveLength(items.length);expect(items.map(i=>i.stars)).toEqual([...items.map(i=>i.stars)].sort((a,b)=>a-b));expect(new Set(items.map(i=>i.id)).size).toBe(items.length)});
+ it('wears one item per slot and takes an item off when it is picked again',()=>{
+  let o=toggleItem(noOutfits,'puppy','hat');expect(o).toEqual({puppy:['hat'],bunny:[]});
+  o=toggleItem(o,'puppy','glasses');expect(o.puppy).toEqual(['hat','glasses']);
+  // The crown and the party hat both go on the head, so the crown replaces the hat.
+  o=toggleItem(o,'puppy','crown');expect(o.puppy).toEqual(['glasses','crown']);
+  o=toggleItem(o,'bunny','crown');expect(o.bunny).toEqual(['crown']);
+  o=toggleItem(o,'puppy','glasses');expect(o.puppy).toEqual(['crown']);expect(noOutfits).toEqual({puppy:[],bunny:[]});
+ });
+ it('shows only what the current stars have unlocked',()=>{expect(visibleOutfits({puppy:['hat','crown'],bunny:['cape']},10)).toEqual({puppy:['hat'],bunny:[]});expect(visibleOutfits({puppy:['hat','crown'],bunny:['cape']},60)).toEqual({puppy:['hat','crown'],bunny:['cape']})});
+ it('round-trips through storage and ignores junk',()=>{const store=memory();saveOutfits(store,{puppy:['bow'],bunny:['flower','cape']});expect(loadOutfits(store)).toEqual({puppy:['bow'],bunny:['flower','cape']});for(const text of ['nope','null','[]','{"puppy":"hat"}','{"puppy":["hat","laser"],"bunny":5}']){store.setItem(OUTFIT_KEY,text)}expect(loadOutfits(store)).toEqual({puppy:['hat'],bunny:[]});store.setItem(OUTFIT_KEY,'nope');expect(loadOutfits(store)).toEqual(noOutfits)});
 });
