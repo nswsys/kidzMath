@@ -1,0 +1,96 @@
+/* Activity switch on the home screen */
+.activity-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 16px;max-width:560px}
+.activity-switch button{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 14px;min-height:60px;background:#fffefa;border:3px solid #d9d0ea;border-radius:18px;box-shadow:0 4px 0 #d4c4e466;color:#5c457b}
+.activity-switch button.chosen{background:#ece1ff;border-color:#9380bd;box-shadow:0 4px 0 #b7a3d5}
+.activity-switch .activity-icon{font-size:26px;line-height:1}
+.activity-switch strong{display:block;font-family:'Outfit',sans-serif;font-size:16px;font-weight:600}
+.activity-switch small{display:block;font-size:11px;color:#806b91}
+
+/* Word search setup */
+.ws-themes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px}
+.ws-themes button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:76px;padding:8px 6px;background:#fffefa;border:2px solid #e0d4e8;border-radius:16px;color:#6b587c;box-shadow:0 3px 0 #e6dcef}
+.ws-themes button>span[aria-hidden]{font-size:26px;line-height:1.1}
+.ws-themes strong{font-size:12px;font-weight:600;text-align:center}
+.ws-themes button.chosen{background:#ece1ff;border-color:#9380bd;color:#5c3f80;box-shadow:0 3px 0 #b7a3d5}
+.ws-themes .selected-tick{position:absolute;top:6px;right:6px}
+.ws-level{margin-bottom:20px}
+.ws-level .segments button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px}
+.ws-level .segments small{font-size:10px;font-weight:500;opacity:.85}
+
+/* Word search game */
+.ws-game{max-width:1000px}
+.ws-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:22px;align-items:start;margin-top:16px}
+.ws-board{container-type:inline-size;width:100%;max-width:min(100%,max(calc(100dvh - 230px),340px));margin:0 auto;background:#fffefa;border:3px solid #a8b6d4;border-radius:22px;box-shadow:0 7px 0 #9eb1cc66;padding:10px}
+.ws-grid{display:grid;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none}
+.ws-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;padding:0;border-radius:28%;font-family:'Outfit',sans-serif;font-weight:600;font-size:calc(100cqw / var(--ws-size) * .52);line-height:1;color:#3f3358;background:#f6f2fc;outline-offset:-2px;transition:background .12s,scale .12s}
+.ws-cell:not(:disabled):active{transform:none}
+.ws-cell.found{color:#3b2f52}
+.ws-cell.selected,.ws-cell.anchor{background:#7860df!important;color:#fff;scale:1.06}
+.ws-cell.hint-glow{box-shadow:0 0 0 3px #eeb649 inset;animation:ws-glow 1s ease-in-out infinite}
+@keyframes ws-glow{50%{background:#ffe9a8}}
+.ws-side{display:flex;flex-direction:column;gap:14px;background:#fffefa;border:3px solid #b5bdd9;border-radius:22px;box-shadow:0 6px 0 #9eb1cc66;padding:16px}
+.ws-words-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px}
+.ws-words{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ws-words li{display:flex;align-items:center;justify-content:center;gap:4px;min-height:36px;padding:4px 6px;border-radius:12px;background:#f3eef9;color:#4e3b68;font-family:'Outfit',sans-serif;font-weight:600;font-size:13px;letter-spacing:.6px;overflow-wrap:anywhere;text-align:center}
+.ws-words li.found{text-decoration:line-through;text-decoration-thickness:2px;color:#5b4a3a}
+.ws-status{font-size:13px;line-height:1.45;color:#7f619d;text-align:center;min-height:38px;display:flex;align-items:center;justify-content:center}
+.ws-cheer{display:flex;align-items:center;gap:10px;text-align:left}
+.ws-cheer .reaction-mascot{width:70px;height:78px;flex-shrink:0;display:block}
+.ws-cheer .reaction-mascot svg{width:100%;height:100%}
+.ws-cheer strong{display:block}
+.ws-side .primary.full{width:100%;background:#ffda54;color:#674721}
+
+@media(max-width:850px){
+ .ws-layout{grid-template-columns:1fr;gap:12px;margin-top:10px}
+ .ws-board{max-width:min(100%,max(calc(100dvh - 330px),340px));padding:7px;border-radius:18px}
+ .ws-side{padding:12px;gap:10px;border-radius:18px}
+ .ws-words{grid-template-columns:repeat(3,1fr);gap:6px}
+ .ws-words li{min-height:32px;font-size:12px;letter-spacing:.2px}
+ .ws-words-head{min-height:40px}
+}
+@media(max-width:600px){
+ .activity-switch{gap:8px;margin-bottom:10px}
+ .activity-switch button{padding:8px 10px;gap:8px;min-height:54px;border-radius:15px}
+ .activity-switch .activity-icon{font-size:22px}
+ .activity-switch strong{font-size:14px}
+ .activity-switch small{display:none}
+ .ws-themes{gap:7px;margin-bottom:14px}
+ .ws-themes button{min-height:64px;border-radius:13px}
+ .ws-themes button>span[aria-hidden]{font-size:22px}
+ .ws-themes strong{font-size:11px}
+ .ws-level{margin-bottom:14px}
+ .ws-grid{gap:1px}
+}
+@media(min-width:601px) and (orientation:landscape) and (max-height:720px){
+ .ws-layout{grid-template-columns:minmax(0,1fr) 250px;gap:14px;margin-top:8px}
+ .ws-board{max-width:min(100%,max(calc(100dvh - 150px),340px))}
+ .ws-words{grid-template-columns:1fr 1fr}
+ .ws-words li{min-height:30px;font-size:12px;letter-spacing:.2px}
+}
+@media(prefers-reduced-motion:reduce){.ws-cell{transition:none}.ws-cell.hint-glow{animation:none}}
+@media print{.activity-switch,.ws-game{display:none}}
+
+/* Three stats on the word search result screen */
+.result-stats.ws-result-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ws-cheer .cheer-title{color:#7860df;font-family:'Outfit',sans-serif;font-size:19px;font-weight:700;line-height:1.2}
+
+/* Printable word search worksheet */
+.sheet-kinds{max-width:360px;margin-bottom:18px}
+.worksheet-settings.ws-sheet-settings{grid-template-columns:repeat(2,minmax(0,1fr));max-width:560px}
+.ws-sheet-board{container-type:inline-size;width:100%;max-width:520px;margin:0 auto 26px}
+.ws-sheet-grid{display:grid;border:2px solid #3f3358;border-radius:10px;padding:1.5cqw;background:white}
+.ws-sheet-grid span{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:600;font-size:calc(100cqw / var(--ws-size) * .5);line-height:1;color:#1f1b2b}
+.ws-sheet-grid.answers span{color:#8a8794;font-weight:500}
+.ws-sheet-grid.answers span.answer{background:#ffe08a;color:#1f1b2b;font-weight:700;border-radius:22%}
+.ws-sheet-words{list-style:none;margin:0 auto 30px;padding:0;max-width:620px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px;font-family:'Outfit',sans-serif;font-weight:600;font-size:16px;letter-spacing:.8px}
+.ws-sheet-words li{display:flex;align-items:center;gap:9px}
+.ws-sheet-box{width:15px;height:15px;border:2px solid #3f3358;border-radius:4px;flex-shrink:0}
+.ws-sheet-key h2{text-align:center;margin-bottom:20px}
+@media(max-width:600px){.ws-sheet-words{grid-template-columns:1fr 1fr;font-size:13px;gap:10px 12px;letter-spacing:.3px}.sheet-kinds{margin-bottom:14px}}
+@media print{
+ .ws-sheet-board{max-width:150mm;margin-bottom:9mm}
+ .ws-sheet .name-line{padding:6mm 0}
+ .ws-sheet-words{grid-template-columns:repeat(4,minmax(0,1fr));font-size:13pt;gap:4mm 6mm;max-width:none;margin-bottom:8mm}
+ .ws-sheet-grid,.ws-sheet-words,.ws-sheet-key{break-inside:avoid}
+ .ws-sheet-grid span{color:black}
+}

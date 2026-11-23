@@ -7,6 +7,7 @@ import {KEY,loadProgress} from './progress';
 import {WELCOME_KEY} from './Playground';
 import {SoundKit} from './sounds';
 import {defaults,score} from './math';
+import {generatePuzzle} from './wordsearch';
 function answer(){const t=document.querySelector('.math-question')!.textContent!;const m=t.match(/(\d+)\s*([+−])\s*(\d+)/)!;return String(m[2]==='+'?Number(m[1])+Number(m[3]):Number(m[1])-Number(m[3]));}
 beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});localStorage.clear();sessionStorage.clear();sessionStorage.setItem(WELCOME_KEY,'seen');vi.spyOn(SoundKit.prototype,'play').mockReturnValue(true);vi.spyOn(SoundKit.prototype,'stop').mockImplementation(()=>{});vi.spyOn(Math,'random').mockReturnValue(.2);HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','')};HTMLDialogElement.prototype.close=function(){this.removeAttribute('open')}});
 afterEach(()=>{cleanup();vi.restoreAllMocks()});
@@ -95,4 +96,46 @@ describe('complete learning flows',()=>{
   await user.type(screen.getByLabelText('Your answer'),answer());await user.keyboard('{Enter}');expect(SoundKit.prototype.play).not.toHaveBeenCalled();
  });
 
+ it('plays a themed word search with taps and hints, then saves stars beside math games',async()=>{
+  const user=userEvent.setup();const view=render(<App/>);
+  await user.click(screen.getByRole('button',{name:/Word search/}));expect(screen.getByRole('region',{name:'Choose your word search'})).toBeTruthy();expect(screen.queryByRole('region',{name:'Choose your game'})).toBe(null);
+  await user.click(screen.getByRole('button',{name:/^Solar system/}));await user.click(screen.getByRole('button',{name:'Find the words!'}));
+  // Math.random is pinned in these tests, so the same call reproduces the puzzle on screen.
+  const puzzle=generatePuzzle({theme:'space',difficulty:'Easy'});expect(puzzle.placements).toHaveLength(6);
+  const cell=(p:{r:number;c:number})=>document.querySelector<HTMLElement>(`.ws-cell[data-r="${p.r}"][data-c="${p.c}"]`)!;
+  expect(document.querySelectorAll('.ws-cell')).toHaveLength(64);expect(screen.getByText('0 of 6')).toBeTruthy();
+  const [first,...rest]=puzzle.placements;
+  await user.click(cell(first.cells[0]));expect(cell(first.cells[0]).getAttribute('aria-pressed')).toBe('true');
+  const crooked=puzzle.placements.flatMap(p=>p.cells).find(c=>c.r!==first.cells[0].r&&c.c!==first.cells[0].c&&Math.abs(c.r-first.cells[0].r)!==Math.abs(c.c-first.cells[0].c));
+  if(crooked){await user.click(cell(crooked));expect(screen.getByRole('status').textContent).toMatch(/straight line/);await user.click(cell(crooked))}else await user.click(cell(first.cells[0]));
+  await user.click(screen.getByRole('button',{name:'Hint'}));expect(screen.getByRole('status').textContent).toContain(`${first.word} starts at the glowing letter`);expect(cell(first.cells[0]).className).toContain('hint-glow');
+  await user.click(cell(first.cells[0]));await user.click(cell(first.cells[first.cells.length-1]));
+  expect(screen.getByRole('status').textContent).toContain(`You found ${first.word}`);expect(screen.getByText('1 of 6')).toBeTruthy();expect(cell(first.cells[0]).className).toContain('found');expect(SoundKit.prototype.play).toHaveBeenCalledWith('correct');
+  expect(screen.queryByRole('button',{name:'See my stars'})).toBe(null);
+  await user.click(screen.getByRole('button',{name:'My progress'}));const dialog=screen.getByRole('dialog');await user.click(within(dialog).getByRole('button',{name:'Keep playing'}));
+  // Backwards selections count too.
+  for(const p of rest){await user.click(cell(p.cells[p.cells.length-1]));await user.click(cell(p.cells[0]))}
+  expect(screen.getByText('6 of 6')).toBeTruthy();expect(screen.queryByRole('button',{name:'Hint'})).toBe(null);await user.click(screen.getByRole('button',{name:'See my stars'}));
+  expect(screen.getByText('YOU DID IT!')).toBeTruthy();expect(screen.getByText('words found')).toBeTruthy();expect(screen.getByText('hint used')).toBeTruthy();expect(screen.getByText(/New badge: Word detective/)).toBeTruthy();
+  const saved=loadProgress(localStorage).results[0];expect(saved).toMatchObject({activity:'wordsearch',correct:5,total:6,stars:2,points:50,settings:{theme:'space',difficulty:'Easy',count:6}});
+  await user.click(screen.getByRole('button',{name:'Play again'}));expect(screen.getByText('0 of 6')).toBeTruthy();
+  view.unmount();render(<App/>);await user.click(screen.getByRole('button',{name:'My progress'}));expect(screen.getByText('Word search')).toBeTruthy();expect(screen.getByText(/Solar system · 6 words/)).toBeTruthy();expect(screen.getByText('5 of 6 without hints')).toBeTruthy();
+ });
+ it('prints a fresh word search worksheet with a shaded answer key',async()=>{
+  const user=userEvent.setup();const print=vi.spyOn(window,'print').mockImplementation(()=>{});render(<App/>);await user.click(screen.getByRole('button',{name:'Worksheets'}));
+  expect(document.querySelector('.worksheet-problems')).toBeTruthy();expect(document.querySelector('.ws-sheet')).toBe(null);
+  await user.click(screen.getByRole('button',{name:/Word search/}));expect(document.querySelector('.worksheet-problems')).toBe(null);expect(screen.queryByLabelText('Questions')).toBe(null);
+  expect(screen.getByText(/My word search: Animals/)).toBeTruthy();expect(document.querySelectorAll('.ws-sheet-grid span')).toHaveLength(64);expect(document.querySelectorAll('.ws-sheet-words li')).toHaveLength(6);expect(screen.getByText(/Words go across and down\./)).toBeTruthy();
+  await user.selectOptions(screen.getByLabelText('Theme'),'foods');await user.selectOptions(screen.getByLabelText('Level'),'Challenge');
+  // Like math worksheets, the paper only changes when a fresh one is requested.
+  expect(screen.getByText(/My word search: Animals/)).toBeTruthy();await user.click(screen.getByRole('button',{name:'Generate fresh'}));
+  const puzzle=generatePuzzle({theme:'foods',difficulty:'Challenge'});
+  expect(screen.getByText(/My word search: Foods/)).toBeTruthy();expect(screen.getByText(/even backwards/)).toBeTruthy();expect(document.querySelectorAll('.ws-sheet-grid span')).toHaveLength(144);
+  expect([...document.querySelectorAll('.ws-sheet-words li')].map(li=>li.textContent)).toEqual(puzzle.placements.map(p=>p.word));
+  expect([...document.querySelectorAll('.ws-sheet-grid span')].map(s=>s.textContent).join('')).toBe(puzzle.grid.flat().join(''));
+  expect(document.querySelector('.ws-sheet-key')).toBe(null);await user.click(screen.getByLabelText('Include answer key'));
+  expect(document.querySelectorAll('.ws-sheet-key .answer')).toHaveLength(new Set(puzzle.placements.flatMap(p=>p.cells.map(c=>`${c.r}-${c.c}`))).size);
+  await user.click(screen.getByRole('button',{name:'Print worksheet'}));expect(print).toHaveBeenCalledOnce();
+  await user.click(screen.getByRole('button',{name:/Math/}));expect(document.querySelector('.worksheet-problems')).toBeTruthy();expect(screen.getByLabelText('Questions')).toBeTruthy();
+ });
 });

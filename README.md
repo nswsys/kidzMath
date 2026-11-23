@@ -1,6 +1,6 @@
 # kidzMath
 
-A gentle, playful math adventure for ages 6–10, with original SVG buddies Milo the puppy and Luna the bunny. All student-facing content is English.
+A gentle, playful activity app for ages 6–10, with original SVG buddies Milo the puppy and Luna the bunny. It started as a math adventure and now also offers themed word searches; the home screen lets children switch between activities. All student-facing content is English.
 
 ## Local development
 
@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open the development URL at `/kidzMath/`. Run `npm test` for arithmetic, validation, scoring, and persistence tests. Run `npm run build` for the TypeScript check and production build; `npm run preview` serves the built app at `/kidzMath/`.
+Open the development URL at `/kidzMath/`. Run `npm test` for arithmetic, word search generation, validation, scoring, and persistence tests. Run `npm run build` for the TypeScript check and production build; `npm run preview` serves the built app at `/kidzMath/`.
 
 ## Playground experience
 
@@ -29,9 +29,19 @@ Scores use first-attempt answers: 90%+ = A, 80%+ = B, 70%+ = C, 60%+ = D; lower 
 
 The dashboard shows weighted overall accuracy, games, stars, points, best streak, badges, and the ten most recent results. Up to 1,000 results are retained on this device. No accounts, analytics, ads, or collection of personal information. Progress uses `localStorage`, so clearing browser data or changing devices will remove it. Storage failures display a message and still permit play. Reset progress from the dashboard.
 
+## Word searches
+
+Choose **Word search** on the home screen, then a theme and a level. Themes: Animals, Solar system, Science, Fruits, Foods, Sports, Cartoon stars, and Shows & movies. Word lists live in `src/wordsearch.ts`; add a theme by adding an entry to `themes` (uppercase A–Z words of 3–10 letters).
+
+Every puzzle is generated fresh on the device, so it works offline. Easy is an 8×8 grid with 6 words reading left-to-right or top-to-bottom. Medium is 10×10 with 8 words and adds diagonals. Challenge is 12×12 with 10 words and adds backwards words. Each answer can be read in exactly one place, answers hidden inside other answers are never chosen together, and filler letters are checked against a short list of unkind words.
+
+Find a word by dragging across it, or by tapping its first and then its last letter; either end may come first. Drags snap to the nearest row, column, or diagonal. With a keyboard, move with the arrow keys and press Enter or Space on the first and last letters. **Hint** makes the first letter of an unfound word glow.
+
+Finishing a puzzle earns stars with the same rules as math, counting words found without a hint as first-attempt answers, plus 10 points per word found without a hint. Results are saved in the same progress store as math games (marked `activity: 'wordsearch'`), appear in the dashboard, and unlock the Word detective badge.
+
 ## Worksheets
 
-Choose options, select **Generate fresh**, and print. The optional answer key starts on a new printed page. Printing works through the system print dialog, including Save as PDF where available. No names are entered or stored by the app; the printed name line is for pencil use.
+Choose **Math** or **Word search**, pick your options, select **Generate fresh**, and print. A word search worksheet has the letter grid, a tick-off word list, and a line saying which directions words can go; its answer key repeats the grid with the hidden words shaded. The optional answer key starts on a new printed page. Printing works through the system print dialog, including Save as PDF where available. No names are entered or stored by the app; the printed name line is for pencil use.
 
 ## PWA and offline use
 
@@ -47,4 +57,4 @@ In **Settings → Pages → Build and deployment**, select **GitHub Actions** as
 
 ## Original artwork
 
-Milo, Luna, and the meadow are original vector artwork made for this project. The original Magic k icon artwork and its exported assets are included in this repository. They use no third-party cartoon characters or branding. Standard emoji are rendered by each device.
+Milo, Luna, and the meadow are original vector artwork made for this project. The original Magic k icon artwork and its exported assets are included in this repository. The artwork uses no third-party cartoon characters or branding. The Cartoon stars and Shows & movies word lists mention well-known character and show names as plain text only; those names belong to their respective owners. Standard emoji are rendered by each device.
